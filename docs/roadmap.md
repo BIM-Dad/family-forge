@@ -50,6 +50,25 @@ Deliverables:
 - Parameter creation.
 - Reference plane creation.
 
+## Phase 2.5: Furniture Fidelity Primitives
+
+Goal: move from recognizable massing to BIM-authored furniture logic.
+
+Deliverables:
+
+- Blend primitive for tapered legs and tapered posts.
+- Sweep primitive for pulls, rails, rods, and bevel/profile trim.
+- Reveal/gap parameter support for doors, drawers, panels, and face frames.
+- Recessed panel relationship for doors and drawer fronts.
+- Face-frame pattern for cabinet/casework recipes.
+- Prompt instructions that separate ideal Revit modeling intent from current buildable approximation.
+
+Success criteria:
+
+- Test 001 rebuild uses blends for legs.
+- Test 001 rebuild uses sweeps for pulls with end returns.
+- Test 001 front frame reads as profiled trim instead of stacked rectangular blocks.
+
 Success criteria:
 
 - Build add-in binaries for Revit 2024, 2025, 2026, and 2027.

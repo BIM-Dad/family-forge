@@ -64,6 +64,7 @@ public sealed class GeometrySpec
     public DimensionsSpec Dimensions { get; set; } = new();
     public bool Visible { get; set; } = true;
     public string? Notes { get; set; }
+    public string? Intent { get; set; }
 }
 
 public sealed class PointSpec

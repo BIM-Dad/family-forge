@@ -28,8 +28,10 @@ The current builder should generate a native Revit Furniture family with:
 - Overall product dimensions were supplied: 42 in wide, 18 in deep, 45 in high.
 - Internal component proportions are inferred from the image.
 - Wood grain is represented only by material color.
-- Angled/tapered legs are simplified as rectangular posts.
-- Drawer gaps and bevels are approximate front-panel geometry.
+- Tapered round legs should be blends, but are simplified in the current builder.
+- Pulls should be sweeps with end returns, but are simplified in the current builder.
+- Front frame bevels should be sweep/profile geometry, but are approximated.
+- Drawer/door reveals should be minimal, approximately 1/8 in to 1/4 in.
 - The family is not parametric yet.
 
 ## Test Instructions

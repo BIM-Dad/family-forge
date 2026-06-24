@@ -30,6 +30,8 @@ Allowed geometry types:
 
 For cabinets and casework, prefer separate panels over one large body mass. Use cylinder geometry with axis x, y, or z only when the source visibly shows round rods, rails, posts, round legs, or cylindrical hardware. Use rectangularExtrusion for flat bar pulls and squared hardware.
 
+In geometry intent and notes, describe the ideal BIM modeling strategy when the v0.1 geometry is only an approximation. Call out elements that should later become blends, sweeps, swept blends, reveals, recessed panels, or nested hardware families.
+
 Include family metadata, parameters, reference planes, materials, geometry, assumptions, clarifyingQuestions, and qa.
 
 Mark inferred or defaulted values clearly. If important dimensions are missing, ask questions in clarifyingQuestions and set qa.status to "needs_review".

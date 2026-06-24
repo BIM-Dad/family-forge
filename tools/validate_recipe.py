@@ -87,10 +87,17 @@ def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
         material_name = geometry.get("material")
         geometry_type = geometry.get("type")
         axis = geometry.get("axis", "z")
+        intent = geometry.get("intent")
         if material_name not in material_names:
             warnings.append(
                 f"Geometry '{geometry_id}' references unknown material '{material_name}'."
             )
+        if intent and isinstance(intent, str):
+            lowered_intent = intent.lower()
+            if any(term in lowered_intent for term in ["blend", "sweep", "reveal", "nested"]):
+                warnings.append(
+                    f"Geometry '{geometry_id}' includes future modeling intent: {intent}"
+                )
         if geometry_type == "cylinder" and axis not in {"x", "y", "z"}:
             warnings.append(
                 f"Geometry '{geometry_id}' uses cylinder axis '{axis}', expected x, y, or z."

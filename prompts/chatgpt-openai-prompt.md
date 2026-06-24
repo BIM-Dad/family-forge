@@ -16,6 +16,8 @@ The recipe must follow schemaVersion 0.1 and include:
 - panelized cabinet/casework geometry where possible instead of one large body block
 - cylinder geometry with axis x, y, or z only when the source visibly shows round rods, posts, rails, round legs, or cylindrical hardware
 - rectangularExtrusion geometry for flat bar pulls and squared hardware
+- intent and notes describing the ideal BIM modeling strategy when v0.1 geometry is only an approximation
+- explicit notes for elements that should later become blends, sweeps, swept blends, reveals, recessed panels, or nested hardware families
 - constraints when useful
 - assumptions
 - clarifyingQuestions

@@ -17,6 +17,11 @@ Follow these rules:
 - Prefer simple native Revit primitives: rectangular extrusions, void rectangular extrusions, and cylinders.
 - For cabinets/casework, prefer separate top, bottom, side, back, door, drawer, frame, and trim panels instead of one large body block.
 - Use `cylinder` with `axis` set to `x`, `y`, or `z` only when the source visibly shows round rods, posts, rails, round legs, or cylindrical hardware. Use rectangular extrusions for flat bar pulls and squared hardware.
+- Include BIM modeling intent in `intent` and supporting `notes`: call out when an element should ideally be a Revit blend, sweep, swept blend, reveal, nested hardware family, or parametric face-frame condition even if the v0.1 buildable geometry must be simplified.
+- For tapered legs, prefer an explicit note that the ideal Revit primitive is a blend; only use the current available primitive as a temporary approximation.
+- For pulls with end returns, prefer an explicit note that the ideal Revit primitive is a sweep path with returns back to the panel.
+- For front frames or bevels, describe the intended sweep/profile relationship and approximate it with buildable geometry only when necessary.
+- For recessed panels, include the setback relationship in origin/depth choices and document the intended reveal/gap.
 - Keep names readable and Revit-safe.
 - Include assumptions and warnings.
 - Use `qa.status = "needs_review"` unless the user has provided all critical dimensions.

@@ -18,11 +18,13 @@ Rules:
 6. For cabinets/casework, prefer separate panels over one large body mass.
 7. Use cylinder axis x, y, or z only when the source visibly shows round rods, rails, posts, round legs, or cylindrical hardware.
 8. Use rectangularExtrusion for flat bar pulls and squared hardware.
-9. Include Width, Depth, and Height parameters when applicable.
-10. Include named reference planes.
-11. Include materials and subcategories.
-12. Include assumptions and qa warnings.
-13. Set qa.status to "needs_review" unless the source material fully defines the family.
+9. In geometry intent and notes, identify the ideal BIM modeling strategy when the v0.1 geometry is only an approximation.
+10. Call out elements that should later become blends, sweeps, swept blends, reveals, recessed panels, or nested hardware families.
+11. Include Width, Depth, and Height parameters when applicable.
+12. Include named reference planes.
+13. Include materials and subcategories.
+14. Include assumptions and qa warnings.
+15. Set qa.status to "needs_review" unless the source material fully defines the family.
 
 Family request:
 <insert request here>

@@ -205,7 +205,8 @@
       "origin": { "x": 53.3, "y": -25, "z": 207 },
       "dimensions": { "width": 275.6, "depth": 25, "height": 875 },
       "visible": true,
-      "notes": "Approximate left front door."
+      "notes": "Approximate left front door recessed into the face frame.",
+      "intent": "Door panel should be recessed inside the internal faceplate with a minimal 1/8 in to 1/4 in reveal."
     },
     {
       "id": "left_door_b",
@@ -216,7 +217,8 @@
       "origin": { "x": 328.9, "y": -25, "z": 207 },
       "dimensions": { "width": 275.6, "depth": 25, "height": 875 },
       "visible": true,
-      "notes": "Approximate right leaf of left door bay."
+      "notes": "Approximate right leaf of left door bay recessed into the face frame.",
+      "intent": "Door panel should be recessed inside the internal faceplate with a minimal 1/8 in to 1/4 in reveal."
     },
     {
       "id": "right_drawer_1",
@@ -227,7 +229,8 @@
       "origin": { "x": 653.3, "y": -25, "z": 865.3 },
       "dimensions": { "width": 360, "depth": 25, "height": 198.7 },
       "visible": true,
-      "notes": "Top drawer front."
+      "notes": "Top drawer front approximated as a flat recessed panel.",
+      "intent": "Drawer front should sit slightly back from the face frame with minimal reveals between adjacent drawer panels."
     },
     {
       "id": "right_drawer_2",
@@ -238,7 +241,8 @@
       "origin": { "x": 653.3, "y": -25, "z": 645.8 },
       "dimensions": { "width": 360, "depth": 25, "height": 198.7 },
       "visible": true,
-      "notes": "Second drawer front."
+      "notes": "Second drawer front approximated as a flat recessed panel.",
+      "intent": "Drawer front should sit slightly back from the face frame with minimal reveals between adjacent drawer panels."
     },
     {
       "id": "right_drawer_3",
@@ -249,7 +253,8 @@
       "origin": { "x": 653.3, "y": -25, "z": 426.4 },
       "dimensions": { "width": 360, "depth": 25, "height": 198.7 },
       "visible": true,
-      "notes": "Third drawer front."
+      "notes": "Third drawer front approximated as a flat recessed panel.",
+      "intent": "Drawer front should sit slightly back from the face frame with minimal reveals between adjacent drawer panels."
     },
     {
       "id": "right_drawer_4",
@@ -260,7 +265,8 @@
       "origin": { "x": 653.3, "y": -25, "z": 207 },
       "dimensions": { "width": 360, "depth": 25, "height": 198.7 },
       "visible": true,
-      "notes": "Bottom drawer front."
+      "notes": "Bottom drawer front approximated as a flat recessed panel.",
+      "intent": "Drawer front should sit slightly back from the face frame with minimal reveals between adjacent drawer panels."
     },
     {
       "id": "top_front_rail",
@@ -271,7 +277,8 @@
       "origin": { "x": 0, "y": -35, "z": 1084.7 },
       "dimensions": { "width": "Width", "depth": 35, "height": 49.7 },
       "visible": true,
-      "notes": "Approximates thick top front frame."
+      "notes": "Approximates thick top front frame.",
+      "intent": "Front frame should eventually be a sweep with a profiled bevel sloping toward the cabinet center."
     },
     {
       "id": "bottom_front_rail",
@@ -282,7 +289,8 @@
       "origin": { "x": 0, "y": -35, "z": 152.4 },
       "dimensions": { "width": "Width", "depth": 35, "height": 49.7 },
       "visible": true,
-      "notes": "Approximates lower front rail above legs."
+      "notes": "Approximates lower front rail above legs.",
+      "intent": "Front frame should eventually be a sweep with a profiled bevel sloping toward the cabinet center."
     },
     {
       "id": "left_front_stile",
@@ -293,7 +301,8 @@
       "origin": { "x": 0, "y": -35, "z": 152.4 },
       "dimensions": { "width": 48.9, "depth": 35, "height": "Body Height" },
       "visible": true,
-      "notes": "Left vertical frame."
+      "notes": "Left vertical frame.",
+      "intent": "Face frame stile should eventually be a sweep/profile condition rather than a plain rectangular extrusion."
     },
     {
       "id": "middle_front_stile",
@@ -304,7 +313,8 @@
       "origin": { "x": 613.4, "y": -35, "z": 152.4 },
       "dimensions": { "width": 40, "depth": 35, "height": "Body Height" },
       "visible": true,
-      "notes": "Divider between door bay and drawer bay."
+      "notes": "Divider between door bay and drawer bay.",
+      "intent": "Central divider should be modeled as an internal dividing panel plus a slightly set-back face panel."
     },
     {
       "id": "right_front_stile",
@@ -315,7 +325,8 @@
       "origin": { "x": 1013.5, "y": -35, "z": 152.4 },
       "dimensions": { "width": 53.3, "depth": 35, "height": "Body Height" },
       "visible": true,
-      "notes": "Right vertical frame."
+      "notes": "Right vertical frame.",
+      "intent": "Face frame stile should eventually be a sweep/profile condition rather than a plain rectangular extrusion."
     },
     {
       "id": "left_vertical_handle",
@@ -326,7 +337,8 @@
       "origin": { "x": 560, "y": -60, "z": 596 },
       "dimensions": { "width": 19.6, "depth": 25, "height": 181.5 },
       "visible": true,
-      "notes": "Slim rectangular vertical pull matching the source image."
+      "notes": "Slim vertical pull matching the source image.",
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the door face."
     },
     {
       "id": "drawer_handle_1",
@@ -337,7 +349,8 @@
       "origin": { "x": 760, "y": -60, "z": 948 },
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Slim rectangular horizontal pull matching the source image."
+      "notes": "Slim horizontal pull matching the source image.",
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
     },
     {
       "id": "drawer_handle_2",
@@ -348,7 +361,8 @@
       "origin": { "x": 760, "y": -60, "z": 728.6 },
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Slim rectangular horizontal pull matching the source image."
+      "notes": "Slim horizontal pull matching the source image.",
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
     },
     {
       "id": "drawer_handle_3",
@@ -359,7 +373,8 @@
       "origin": { "x": 760, "y": -60, "z": 509.1 },
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Slim rectangular horizontal pull matching the source image."
+      "notes": "Slim horizontal pull matching the source image.",
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
     },
     {
       "id": "drawer_handle_4",
@@ -370,7 +385,8 @@
       "origin": { "x": 760, "y": -60, "z": 289.7 },
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Slim rectangular horizontal pull matching the source image."
+      "notes": "Slim horizontal pull matching the source image.",
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
     },
     {
       "id": "front_left_leg",
@@ -381,7 +397,8 @@
       "origin": { "x": 71.1, "y": -15, "z": 0 },
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
-      "notes": "Rectangular placeholder for tapered angled leg."
+      "notes": "Rectangular placeholder for tapered angled leg.",
+      "intent": "Leg should eventually be modeled as a tapered round blend."
     },
     {
       "id": "front_right_leg",
@@ -392,7 +409,8 @@
       "origin": { "x": 947, "y": -15, "z": 0 },
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
-      "notes": "Rectangular placeholder for tapered angled leg."
+      "notes": "Rectangular placeholder for tapered angled leg.",
+      "intent": "Leg should eventually be modeled as a tapered round blend."
     },
     {
       "id": "back_left_leg",
@@ -403,7 +421,8 @@
       "origin": { "x": 71.1, "y": 387.2, "z": 0 },
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
-      "notes": "Rectangular placeholder for rear leg."
+      "notes": "Rectangular placeholder for rear leg.",
+      "intent": "Leg should eventually be modeled as a tapered round blend."
     },
     {
       "id": "back_right_leg",
@@ -414,7 +433,8 @@
       "origin": { "x": 947, "y": 387.2, "z": 0 },
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
-      "notes": "Rectangular placeholder for rear leg."
+      "notes": "Rectangular placeholder for rear leg.",
+      "intent": "Leg should eventually be modeled as a tapered round blend."
     }
   ],
   "constraints": [
