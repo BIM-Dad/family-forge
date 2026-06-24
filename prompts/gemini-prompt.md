@@ -28,6 +28,8 @@ Allowed geometry types:
 - voidRectangularExtrusion
 - cylinder
 
+For cabinets and casework, prefer separate panels over one large body mass. Use cylinder geometry with axis x, y, or z for simple pulls, rods, rails, posts, and round legs.
+
 Include family metadata, parameters, reference planes, materials, geometry, assumptions, clarifyingQuestions, and qa.
 
 Mark inferred or defaulted values clearly. If important dimensions are missing, ask questions in clarifyingQuestions and set qa.status to "needs_review".
@@ -35,4 +37,3 @@ Mark inferred or defaulted values clearly. If important dimensions are missing, 
 Family request:
 <insert request here>
 ```
-

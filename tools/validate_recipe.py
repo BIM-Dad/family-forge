@@ -85,9 +85,15 @@ def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
             continue
         geometry_id = geometry.get("id", "<unknown>")
         material_name = geometry.get("material")
+        geometry_type = geometry.get("type")
+        axis = geometry.get("axis", "z")
         if material_name not in material_names:
             warnings.append(
                 f"Geometry '{geometry_id}' references unknown material '{material_name}'."
+            )
+        if geometry_type == "cylinder" and axis not in {"x", "y", "z"}:
+            warnings.append(
+                f"Geometry '{geometry_id}' uses cylinder axis '{axis}', expected x, y, or z."
             )
 
         dimensions = geometry.get("dimensions", {})
@@ -188,4 +194,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

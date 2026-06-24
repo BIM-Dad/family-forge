@@ -43,6 +43,8 @@ Deliverables:
 - First-pass family document creation from installed Revit templates.
 - Family template mapping.
 - Rectangular extrusion builder.
+- Cylinder builder for simple pulls, rods, rails, posts, and round legs.
+- Panelized furniture/casework recipe pattern.
 - Material creation and assignment.
 - Build QA report.
 - Parameter creation.

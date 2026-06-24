@@ -142,15 +142,59 @@
   ],
   "geometry": [
     {
-      "id": "cabinet_body",
+      "id": "left_side_panel",
       "type": "rectangularExtrusion",
-      "name": "Cabinet Body",
-      "subcategory": "Case",
+      "name": "Left Side Panel",
+      "subcategory": "Case Panels",
       "material": "Dark Walnut Side",
       "origin": { "x": 0, "y": 0, "z": 152.4 },
-      "dimensions": { "width": "Width", "depth": "Depth", "height": "Body Height" },
+      "dimensions": { "width": 38.1, "depth": "Depth", "height": "Body Height" },
       "visible": true,
-      "notes": "Current builder approximates the main cabinet as one solid box."
+      "notes": "Panelized cabinet carcass replaces the earlier single solid body."
+    },
+    {
+      "id": "right_side_panel",
+      "type": "rectangularExtrusion",
+      "name": "Right Side Panel",
+      "subcategory": "Case Panels",
+      "material": "Dark Walnut Side",
+      "origin": { "x": 1028.7, "y": 0, "z": 152.4 },
+      "dimensions": { "width": 38.1, "depth": "Depth", "height": "Body Height" },
+      "visible": true,
+      "notes": "Right side panel."
+    },
+    {
+      "id": "top_panel",
+      "type": "rectangularExtrusion",
+      "name": "Top Panel",
+      "subcategory": "Case Panels",
+      "material": "Dark Walnut Side",
+      "origin": { "x": 0, "y": 0, "z": 1105 },
+      "dimensions": { "width": "Width", "depth": "Depth", "height": 38.1 },
+      "visible": true,
+      "notes": "Top case panel."
+    },
+    {
+      "id": "bottom_panel",
+      "type": "rectangularExtrusion",
+      "name": "Bottom Panel",
+      "subcategory": "Case Panels",
+      "material": "Dark Walnut Side",
+      "origin": { "x": 0, "y": 0, "z": 152.4 },
+      "dimensions": { "width": "Width", "depth": "Depth", "height": 38.1 },
+      "visible": true,
+      "notes": "Bottom case panel above legs."
+    },
+    {
+      "id": "back_panel",
+      "type": "rectangularExtrusion",
+      "name": "Back Panel",
+      "subcategory": "Case Panels",
+      "material": "Dark Walnut Side",
+      "origin": { "x": 38.1, "y": 419.1, "z": 190.5 },
+      "dimensions": { "width": 990.6, "depth": 38.1, "height": 914.5 },
+      "visible": true,
+      "notes": "Thin back panel keeps the family from being one solid mass."
     },
     {
       "id": "left_door_a",
@@ -275,58 +319,63 @@
     },
     {
       "id": "left_vertical_handle",
-      "type": "rectangularExtrusion",
+      "type": "cylinder",
       "name": "Left Door Vertical Handle",
       "subcategory": "Hardware",
+      "axis": "z",
       "material": "Aged Brass",
-      "origin": { "x": 560, "y": -60, "z": 596 },
-      "dimensions": { "width": 19.6, "depth": 25, "height": 181.5 },
+      "origin": { "x": 569.8, "y": -47.5, "z": 596 },
+      "dimensions": { "width": 19.6, "depth": 19.6, "height": 181.5 },
       "visible": true,
-      "notes": "Simplified vertical pull."
+      "notes": "Cylindrical vertical pull."
     },
     {
       "id": "drawer_handle_1",
-      "type": "rectangularExtrusion",
+      "type": "cylinder",
       "name": "Top Drawer Handle",
       "subcategory": "Hardware",
+      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -60, "z": 948 },
-      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
+      "origin": { "x": 760, "y": -47.5, "z": 955.5 },
+      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
       "visible": true,
-      "notes": "Simplified horizontal pull."
+      "notes": "Cylindrical horizontal pull."
     },
     {
       "id": "drawer_handle_2",
-      "type": "rectangularExtrusion",
+      "type": "cylinder",
       "name": "Second Drawer Handle",
       "subcategory": "Hardware",
+      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -60, "z": 728.6 },
-      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
+      "origin": { "x": 760, "y": -47.5, "z": 736.1 },
+      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
       "visible": true,
-      "notes": "Simplified horizontal pull."
+      "notes": "Cylindrical horizontal pull."
     },
     {
       "id": "drawer_handle_3",
-      "type": "rectangularExtrusion",
+      "type": "cylinder",
       "name": "Third Drawer Handle",
       "subcategory": "Hardware",
+      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -60, "z": 509.1 },
-      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
+      "origin": { "x": 760, "y": -47.5, "z": 516.6 },
+      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
       "visible": true,
-      "notes": "Simplified horizontal pull."
+      "notes": "Cylindrical horizontal pull."
     },
     {
       "id": "drawer_handle_4",
-      "type": "rectangularExtrusion",
+      "type": "cylinder",
       "name": "Bottom Drawer Handle",
       "subcategory": "Hardware",
+      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -60, "z": 289.7 },
-      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
+      "origin": { "x": 760, "y": -47.5, "z": 297.2 },
+      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
       "visible": true,
-      "notes": "Simplified horizontal pull."
+      "notes": "Cylindrical horizontal pull."
     },
     {
       "id": "front_left_leg",
@@ -393,7 +442,7 @@
   "assumptions": [
     "Overall product dimensions were provided as 42 in wide, 18 in deep, and 45 in high, then converted to millimeters.",
     "Leg height, body height, frame thickness, door split, and front component locations are inferred from the image.",
-    "Wood grain, bevels, drawer gaps, and angled/tapered legs are approximated with rectangular extrusions.",
+    "Wood grain, bevels, drawer gaps, and angled/tapered legs are simplified; the body is now panelized and handles use cylinders.",
     "The builder does not yet create flexing Revit parameters or constraints from the recipe."
   ],
   "clarifyingQuestions": [

@@ -58,6 +58,7 @@ public sealed class GeometrySpec
     public string Type { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string? Subcategory { get; set; }
+    public string? Axis { get; set; }
     public string Material { get; set; } = string.Empty;
     public PointSpec Origin { get; set; } = new();
     public DimensionsSpec Dimensions { get; set; } = new();
@@ -91,4 +92,3 @@ public sealed class QaSpec
     public string Status { get; set; } = "draft";
     public List<string> Warnings { get; set; } = new();
 }
-

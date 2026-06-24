@@ -355,7 +355,7 @@ internal sealed class FamilyForgeNativeBuilder
         transaction.Start();
 
         CreateMaterials();
-        CreateRectangularExtrusions();
+        CreateGeometry();
 
         transaction.Commit();
     }
@@ -380,60 +380,157 @@ internal sealed class FamilyForgeNativeBuilder
         }
     }
 
-    private void CreateRectangularExtrusions()
+    private void CreateGeometry()
     {
         foreach (var geometry in _recipe.Geometry)
         {
-            if (geometry.Type != "rectangularExtrusion")
+            switch (geometry.Type)
             {
-                _warnings.Add(
-                    $"Skipped geometry '{geometry.Id}' because type '{geometry.Type}' is not implemented in the first builder pass.");
-                continue;
+                case "rectangularExtrusion":
+                    CreateRectangularExtrusion(geometry);
+                    break;
+                case "cylinder":
+                    CreateCylinder(geometry);
+                    break;
+                default:
+                    _warnings.Add(
+                        $"Skipped geometry '{geometry.Id}' because type '{geometry.Type}' is not implemented in the current builder.");
+                    break;
             }
-
-            var origin = ResolvePoint(geometry.Origin);
-            var width = ResolveLength(geometry.Dimensions.Width, "width", geometry.Id);
-            var depth = ResolveLength(geometry.Dimensions.Depth, "depth", geometry.Id);
-            var height = ResolveLength(geometry.Dimensions.Height, "height", geometry.Id);
-
-            if (width <= 0 || depth <= 0 || height <= 0)
-            {
-                _warnings.Add(
-                    $"Skipped geometry '{geometry.Id}' because one or more dimensions were not greater than zero.");
-                continue;
-            }
-
-            var profile = new CurveArray();
-            var p1 = origin;
-            var p2 = origin + new XYZ(width, 0, 0);
-            var p3 = origin + new XYZ(width, depth, 0);
-            var p4 = origin + new XYZ(0, depth, 0);
-
-            profile.Append(Line.CreateBound(p1, p2));
-            profile.Append(Line.CreateBound(p2, p3));
-            profile.Append(Line.CreateBound(p3, p4));
-            profile.Append(Line.CreateBound(p4, p1));
-
-            var profileArray = new CurveArrArray();
-            profileArray.Append(profile);
-
-            var sketchPlane = SketchPlane.Create(
-                _document,
-                Plane.CreateByNormalAndOrigin(XYZ.BasisZ, origin));
-
-            var extrusion = _document.FamilyCreate.NewExtrusion(
-                true,
-                profileArray,
-                sketchPlane,
-                height);
-
-            TrySetUniqueElementName(extrusion, geometry);
-
-            ApplyMaterial(extrusion, geometry.Material);
-            ApplySubcategory(extrusion, geometry.Subcategory);
-
-            BuiltGeometryCount++;
         }
+    }
+
+    private void CreateRectangularExtrusion(GeometrySpec geometry)
+    {
+        var origin = ResolvePoint(geometry.Origin);
+        var width = ResolveLength(geometry.Dimensions.Width, "width", geometry.Id);
+        var depth = ResolveLength(geometry.Dimensions.Depth, "depth", geometry.Id);
+        var height = ResolveLength(geometry.Dimensions.Height, "height", geometry.Id);
+
+        if (width <= 0 || depth <= 0 || height <= 0)
+        {
+            _warnings.Add(
+                $"Skipped geometry '{geometry.Id}' because one or more dimensions were not greater than zero.");
+            return;
+        }
+
+        var profile = new CurveArray();
+        var p1 = origin;
+        var p2 = origin + new XYZ(width, 0, 0);
+        var p3 = origin + new XYZ(width, depth, 0);
+        var p4 = origin + new XYZ(0, depth, 0);
+
+        profile.Append(Line.CreateBound(p1, p2));
+        profile.Append(Line.CreateBound(p2, p3));
+        profile.Append(Line.CreateBound(p3, p4));
+        profile.Append(Line.CreateBound(p4, p1));
+
+        var profileArray = new CurveArrArray();
+        profileArray.Append(profile);
+
+        var sketchPlane = SketchPlane.Create(
+            _document,
+            Plane.CreateByNormalAndOrigin(XYZ.BasisZ, origin));
+
+        var extrusion = _document.FamilyCreate.NewExtrusion(
+            true,
+            profileArray,
+            sketchPlane,
+            height);
+
+        FinishForm(extrusion, geometry);
+    }
+
+    private void CreateCylinder(GeometrySpec geometry)
+    {
+        var axis = string.IsNullOrWhiteSpace(geometry.Axis)
+            ? "z"
+            : geometry.Axis.Trim().ToLowerInvariant();
+        var origin = ResolvePoint(geometry.Origin);
+        var width = ResolveLength(geometry.Dimensions.Width, "width", geometry.Id);
+        var depth = ResolveLength(geometry.Dimensions.Depth, "depth", geometry.Id);
+        var height = ResolveLength(geometry.Dimensions.Height, "height", geometry.Id);
+
+        var length = axis switch
+        {
+            "x" => width,
+            "y" => depth,
+            _ => height
+        };
+        var diameter = axis switch
+        {
+            "x" => Math.Min(depth, height),
+            "y" => Math.Min(width, height),
+            _ => Math.Min(width, depth)
+        };
+
+        if (length <= 0 || diameter <= 0)
+        {
+            _warnings.Add(
+                $"Skipped cylinder '{geometry.Id}' because length or diameter was not greater than zero.");
+            return;
+        }
+
+        var radius = diameter / 2.0;
+        var normal = AxisNormal(axis);
+        var xAxis = AxisProfileX(axis);
+        var yAxis = AxisProfileY(axis);
+        var profile = new CurveArray();
+        profile.Append(Arc.Create(origin, radius, 0, Math.PI, xAxis, yAxis));
+        profile.Append(Arc.Create(origin, radius, Math.PI, Math.PI * 2.0, xAxis, yAxis));
+
+        var profileArray = new CurveArrArray();
+        profileArray.Append(profile);
+
+        var sketchPlane = SketchPlane.Create(
+            _document,
+            Plane.CreateByNormalAndOrigin(normal, origin));
+
+        var extrusion = _document.FamilyCreate.NewExtrusion(
+            true,
+            profileArray,
+            sketchPlane,
+            length);
+
+        FinishForm(extrusion, geometry);
+    }
+
+    private void FinishForm(GenericForm form, GeometrySpec geometry)
+    {
+        TrySetUniqueElementName(form, geometry);
+        ApplyMaterial(form, geometry.Material);
+        ApplySubcategory(form, geometry.Subcategory);
+        BuiltGeometryCount++;
+    }
+
+    private static XYZ AxisNormal(string axis)
+    {
+        return axis switch
+        {
+            "x" => XYZ.BasisX,
+            "y" => XYZ.BasisY,
+            _ => XYZ.BasisZ
+        };
+    }
+
+    private static XYZ AxisProfileX(string axis)
+    {
+        return axis switch
+        {
+            "x" => XYZ.BasisY,
+            "y" => XYZ.BasisX,
+            _ => XYZ.BasisX
+        };
+    }
+
+    private static XYZ AxisProfileY(string axis)
+    {
+        return axis switch
+        {
+            "x" => XYZ.BasisZ,
+            "y" => XYZ.BasisZ,
+            _ => XYZ.BasisY
+        };
     }
 
     private ElementId FindMaterialId(string materialName)

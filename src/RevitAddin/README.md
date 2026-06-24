@@ -48,6 +48,7 @@ The first implementation should support:
 
 - Non-hosted Furniture and Generic Models.
 - Rectangular extrusions.
+- Cylinders along X, Y, or Z axes for simple pulls, rods, and posts.
 - Simple subcategory assignment.
 - Material assignment.
 - Warning report for unsupported items.
@@ -55,7 +56,7 @@ The first implementation should support:
 Current limitations:
 
 - Length parameters are read from the recipe to size the first geometry pass, but Revit family parameters and constraints are not created yet.
-- Only `rectangularExtrusion` geometry is built. Voids, cylinders, formulas, and flexing behavior are still pending.
+- `rectangularExtrusion` and `cylinder` geometry are built. Voids, formulas, and flexing behavior are still pending.
 - The generated family is saved automatically. Existing output files with the same family name are overwritten.
 
 ## Revit API Notes

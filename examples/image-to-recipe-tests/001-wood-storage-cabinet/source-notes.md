@@ -30,7 +30,7 @@ Internal dimensions are still inferred:
 - Leg height: 152.4 mm
 - Frame thickness: 38.1 mm
 
-The current Revit builder only supports rectangular extrusions, so angled legs, wood grain, bevels, shadows, and true drawer/door gaps are approximated with simple box geometry.
+The current Revit builder supports rectangular extrusions and simple cylinders. Angled legs, wood grain, bevels, shadows, and true drawer/door gaps are still approximated.
 
 ## Test Goal
 

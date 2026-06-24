@@ -13,6 +13,8 @@ The recipe must follow schemaVersion 0.1 and include:
 - referencePlanes with name, orientation, offset, and isStrongReference
 - materials with name, color, and optional parameterName
 - geometry using only rectangularExtrusion, voidRectangularExtrusion, or cylinder
+- panelized cabinet/casework geometry where possible instead of one large body block
+- cylinder geometry with axis x, y, or z for simple pulls, rods, rails, posts, and round legs
 - constraints when useful
 - assumptions
 - clarifyingQuestions
@@ -32,4 +34,3 @@ Do not silently invent important dimensions. If you infer a dimension, mark the 
 Family request:
 <insert request here>
 ```
-

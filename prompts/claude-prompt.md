@@ -15,13 +15,14 @@ Rules:
 3. Do not silently invent critical dimensions.
 4. If dimensions are missing, add clarifyingQuestions and warnings.
 5. Use simple primitives first: rectangularExtrusion, voidRectangularExtrusion, cylinder.
-6. Include Width, Depth, and Height parameters when applicable.
-7. Include named reference planes.
-8. Include materials and subcategories.
-9. Include assumptions and qa warnings.
-10. Set qa.status to "needs_review" unless the source material fully defines the family.
+6. For cabinets/casework, prefer separate panels over one large body mass.
+7. Use cylinder axis x, y, or z for pulls, rods, rails, posts, and round legs.
+8. Include Width, Depth, and Height parameters when applicable.
+9. Include named reference planes.
+10. Include materials and subcategories.
+11. Include assumptions and qa warnings.
+12. Set qa.status to "needs_review" unless the source material fully defines the family.
 
 Family request:
 <insert request here>
 ```
-

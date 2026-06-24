@@ -15,6 +15,8 @@ Follow these rules:
 - Do not invent critical dimensions silently.
 - If a dimension is not visible or provided, either use a clearly marked default or add a clarifying question.
 - Prefer simple native Revit primitives: rectangular extrusions, void rectangular extrusions, and cylinders.
+- For cabinets/casework, prefer separate top, bottom, side, back, door, drawer, frame, and trim panels instead of one large body block.
+- Use `cylinder` with `axis` set to `x`, `y`, or `z` for simple pulls, rods, posts, rails, and round legs.
 - Keep names readable and Revit-safe.
 - Include assumptions and warnings.
 - Use `qa.status = "needs_review"` unless the user has provided all critical dimensions.
@@ -48,4 +50,3 @@ Required output:
 - Include assumptions, clarifying questions, and QA warnings.
 
 If the source material is insufficient, still return a draft recipe and list the missing information in `clarifyingQuestions`.
-

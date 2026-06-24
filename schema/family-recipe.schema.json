@@ -221,6 +221,10 @@
         "subcategory": {
           "type": "string"
         },
+        "axis": {
+          "type": "string",
+          "enum": ["x", "y", "z"]
+        },
         "material": {
           "type": "string"
         },
@@ -286,4 +290,3 @@
     }
   }
 }
-
