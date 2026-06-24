@@ -432,6 +432,8 @@ internal sealed class FamilyForgeNativeBuilder
     private readonly HashSet<string> _elementNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _referencePlaneNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> _warnings = new();
+    private readonly double _familyWidth;
+    private readonly double _familyDepth;
 
     public FamilyForgeNativeBuilder(Document document, FamilyForgeRecipe recipe)
     {
@@ -444,6 +446,8 @@ internal sealed class FamilyForgeNativeBuilder
                 group => group.Key,
                 group => ConvertLength(group.First().Value, recipe.Family.Units),
                 StringComparer.OrdinalIgnoreCase);
+        _familyWidth = ResolveLengthParameter("Width", 1000);
+        _familyDepth = ResolveLengthParameter("Depth", 500);
     }
 
     public IReadOnlyList<string> Warnings => _warnings;
@@ -678,10 +682,9 @@ internal sealed class FamilyForgeNativeBuilder
             return;
         }
 
-        var offset = ResolveLength(referencePlaneSpec.Offset, "referencePlane.offset", referencePlaneSpec.Name);
-        var width = ResolveLengthParameter("Width", 1000);
-        var depth = ResolveLengthParameter("Depth", 500);
-        var height = ResolveLengthParameter("Height", 1000);
+        var recipeOffset = ResolveLength(referencePlaneSpec.Offset, "referencePlane.offset", referencePlaneSpec.Name);
+        var width = _familyWidth;
+        var depth = _familyDepth;
 
         var orientation = referencePlaneSpec.Orientation.Trim().ToLowerInvariant();
         var bubbleEnd = XYZ.Zero;
@@ -691,18 +694,20 @@ internal sealed class FamilyForgeNativeBuilder
         switch (orientation)
         {
             case "leftright":
-                bubbleEnd = new XYZ(offset, 0, 0);
-                freeEnd = new XYZ(offset, depth, 0);
+                var xOffset = CenterX(recipeOffset);
+                bubbleEnd = new XYZ(xOffset, -depth / 2.0, 0);
+                freeEnd = new XYZ(xOffset, depth / 2.0, 0);
                 cutVector = XYZ.BasisZ;
                 break;
             case "frontback":
-                bubbleEnd = new XYZ(0, offset, 0);
-                freeEnd = new XYZ(width, offset, 0);
+                var yOffset = CenterY(recipeOffset);
+                bubbleEnd = new XYZ(-width / 2.0, yOffset, 0);
+                freeEnd = new XYZ(width / 2.0, yOffset, 0);
                 cutVector = XYZ.BasisZ;
                 break;
             case "vertical":
-                bubbleEnd = new XYZ(0, 0, offset);
-                freeEnd = new XYZ(width, 0, offset);
+                bubbleEnd = new XYZ(-width / 2.0, 0, recipeOffset);
+                freeEnd = new XYZ(width / 2.0, 0, recipeOffset);
                 cutVector = XYZ.BasisY;
                 break;
             default:
@@ -739,6 +744,16 @@ internal sealed class FamilyForgeNativeBuilder
         return _lengthParameters.TryGetValue(parameterName, out var value)
             ? value
             : ConvertLength(fallbackMillimeters, "mm");
+    }
+
+    private double CenterX(double recipeX)
+    {
+        return recipeX - (_familyWidth / 2.0);
+    }
+
+    private double CenterY(double recipeY)
+    {
+        return recipeY - (_familyDepth / 2.0);
     }
 
     private void CreateMaterials()
@@ -783,6 +798,9 @@ internal sealed class FamilyForgeNativeBuilder
             _warnings.Add(
                 "Created family parameters from the recipe, but geometry dimensions are not yet associated to those parameters through Revit constraints.");
         }
+
+        _warnings.Add(
+            "Centered recipe X/Y coordinates on the Revit family origin so default Center Left/Right and Center Front/Back planes remain meaningful.");
     }
 
     private void CreateGeometry()
@@ -1044,8 +1062,8 @@ internal sealed class FamilyForgeNativeBuilder
     private XYZ ResolvePoint(PointSpec point)
     {
         return new XYZ(
-            ResolveLength(point.X, "origin.x", "point"),
-            ResolveLength(point.Y, "origin.y", "point"),
+            CenterX(ResolveLength(point.X, "origin.x", "point")),
+            CenterY(ResolveLength(point.Y, "origin.y", "point")),
             ResolveLength(point.Z, "origin.z", "point"));
     }
 
