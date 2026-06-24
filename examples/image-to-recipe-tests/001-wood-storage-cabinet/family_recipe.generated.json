@@ -1,0 +1,414 @@
+{
+  "schemaVersion": "0.1",
+  "family": {
+    "name": "Wood_Storage_Cabinet_Image_Test_001",
+    "category": "Furniture",
+    "hosting": "NonHosted",
+    "units": "mm",
+    "description": "Image-derived freestanding wood storage cabinet with left doors, right drawers, handles, frame trim, and legs.",
+    "sourceType": "image"
+  },
+  "parameters": [
+    {
+      "name": "Width",
+      "dataType": "length",
+      "value": 1200,
+      "group": "Dimensions",
+      "isInstance": false,
+      "source": "defaulted"
+    },
+    {
+      "name": "Depth",
+      "dataType": "length",
+      "value": 450,
+      "group": "Dimensions",
+      "isInstance": false,
+      "source": "defaulted"
+    },
+    {
+      "name": "Body Height",
+      "dataType": "length",
+      "value": 1200,
+      "group": "Dimensions",
+      "isInstance": false,
+      "source": "defaulted"
+    },
+    {
+      "name": "Leg Height",
+      "dataType": "length",
+      "value": 180,
+      "group": "Dimensions",
+      "isInstance": false,
+      "source": "defaulted"
+    },
+    {
+      "name": "Height",
+      "dataType": "length",
+      "value": 1380,
+      "group": "Dimensions",
+      "isInstance": false,
+      "source": "defaulted"
+    },
+    {
+      "name": "Frame Thickness",
+      "dataType": "length",
+      "value": 45,
+      "group": "Construction",
+      "isInstance": false,
+      "source": "defaulted"
+    },
+    {
+      "name": "Door Material",
+      "dataType": "material",
+      "value": "Warm Walnut",
+      "group": "Materials and Finishes",
+      "isInstance": false,
+      "source": "inferred"
+    },
+    {
+      "name": "Hardware Material",
+      "dataType": "material",
+      "value": "Aged Brass",
+      "group": "Materials and Finishes",
+      "isInstance": false,
+      "source": "inferred"
+    }
+  ],
+  "referencePlanes": [
+    {
+      "name": "Left",
+      "orientation": "leftRight",
+      "offset": 0,
+      "isStrongReference": true
+    },
+    {
+      "name": "Right",
+      "orientation": "leftRight",
+      "offset": "Width",
+      "isStrongReference": true
+    },
+    {
+      "name": "Front",
+      "orientation": "frontBack",
+      "offset": 0,
+      "isStrongReference": true
+    },
+    {
+      "name": "Back",
+      "orientation": "frontBack",
+      "offset": "Depth",
+      "isStrongReference": true
+    },
+    {
+      "name": "Bottom",
+      "orientation": "vertical",
+      "offset": 0,
+      "isStrongReference": true
+    },
+    {
+      "name": "Top",
+      "orientation": "vertical",
+      "offset": "Height",
+      "isStrongReference": true
+    },
+    {
+      "name": "Body Bottom",
+      "orientation": "vertical",
+      "offset": "Leg Height",
+      "isStrongReference": false
+    },
+    {
+      "name": "Door Drawer Split",
+      "orientation": "leftRight",
+      "offset": 700,
+      "isStrongReference": false
+    }
+  ],
+  "materials": [
+    {
+      "name": "Warm Walnut",
+      "color": "#7A472B",
+      "parameterName": "Door Material"
+    },
+    {
+      "name": "Dark Walnut Side",
+      "color": "#4A2B24"
+    },
+    {
+      "name": "Aged Brass",
+      "color": "#A67C3D",
+      "parameterName": "Hardware Material"
+    }
+  ],
+  "geometry": [
+    {
+      "id": "cabinet_body",
+      "type": "rectangularExtrusion",
+      "name": "Cabinet Body",
+      "subcategory": "Case",
+      "material": "Dark Walnut Side",
+      "origin": { "x": 0, "y": 0, "z": 180 },
+      "dimensions": { "width": "Width", "depth": "Depth", "height": "Body Height" },
+      "visible": true,
+      "notes": "Current builder approximates the main cabinet as one solid box."
+    },
+    {
+      "id": "left_door_a",
+      "type": "rectangularExtrusion",
+      "name": "Left Door A",
+      "subcategory": "Doors",
+      "material": "Warm Walnut",
+      "origin": { "x": 60, "y": -25, "z": 250 },
+      "dimensions": { "width": 310, "depth": 25, "height": 1060 },
+      "visible": true,
+      "notes": "Approximate left front door."
+    },
+    {
+      "id": "left_door_b",
+      "type": "rectangularExtrusion",
+      "name": "Left Door B",
+      "subcategory": "Doors",
+      "material": "Warm Walnut",
+      "origin": { "x": 370, "y": -25, "z": 250 },
+      "dimensions": { "width": 310, "depth": 25, "height": 1060 },
+      "visible": true,
+      "notes": "Approximate right leaf of left door bay."
+    },
+    {
+      "id": "right_drawer_1",
+      "type": "rectangularExtrusion",
+      "name": "Top Drawer Front",
+      "subcategory": "Drawers",
+      "material": "Warm Walnut",
+      "origin": { "x": 735, "y": -25, "z": 1045 },
+      "dimensions": { "width": 405, "depth": 25, "height": 240 },
+      "visible": true,
+      "notes": "Top drawer front."
+    },
+    {
+      "id": "right_drawer_2",
+      "type": "rectangularExtrusion",
+      "name": "Second Drawer Front",
+      "subcategory": "Drawers",
+      "material": "Warm Walnut",
+      "origin": { "x": 735, "y": -25, "z": 780 },
+      "dimensions": { "width": 405, "depth": 25, "height": 240 },
+      "visible": true,
+      "notes": "Second drawer front."
+    },
+    {
+      "id": "right_drawer_3",
+      "type": "rectangularExtrusion",
+      "name": "Third Drawer Front",
+      "subcategory": "Drawers",
+      "material": "Warm Walnut",
+      "origin": { "x": 735, "y": -25, "z": 515 },
+      "dimensions": { "width": 405, "depth": 25, "height": 240 },
+      "visible": true,
+      "notes": "Third drawer front."
+    },
+    {
+      "id": "right_drawer_4",
+      "type": "rectangularExtrusion",
+      "name": "Bottom Drawer Front",
+      "subcategory": "Drawers",
+      "material": "Warm Walnut",
+      "origin": { "x": 735, "y": -25, "z": 250 },
+      "dimensions": { "width": 405, "depth": 25, "height": 240 },
+      "visible": true,
+      "notes": "Bottom drawer front."
+    },
+    {
+      "id": "top_front_rail",
+      "type": "rectangularExtrusion",
+      "name": "Top Front Rail",
+      "subcategory": "Frame",
+      "material": "Warm Walnut",
+      "origin": { "x": 0, "y": -35, "z": 1310 },
+      "dimensions": { "width": "Width", "depth": 35, "height": 60 },
+      "visible": true,
+      "notes": "Approximates thick top front frame."
+    },
+    {
+      "id": "bottom_front_rail",
+      "type": "rectangularExtrusion",
+      "name": "Bottom Front Rail",
+      "subcategory": "Frame",
+      "material": "Warm Walnut",
+      "origin": { "x": 0, "y": -35, "z": 180 },
+      "dimensions": { "width": "Width", "depth": 35, "height": 60 },
+      "visible": true,
+      "notes": "Approximates lower front rail above legs."
+    },
+    {
+      "id": "left_front_stile",
+      "type": "rectangularExtrusion",
+      "name": "Left Front Stile",
+      "subcategory": "Frame",
+      "material": "Warm Walnut",
+      "origin": { "x": 0, "y": -35, "z": 180 },
+      "dimensions": { "width": 55, "depth": 35, "height": 1200 },
+      "visible": true,
+      "notes": "Left vertical frame."
+    },
+    {
+      "id": "middle_front_stile",
+      "type": "rectangularExtrusion",
+      "name": "Middle Front Stile",
+      "subcategory": "Frame",
+      "material": "Warm Walnut",
+      "origin": { "x": 690, "y": -35, "z": 180 },
+      "dimensions": { "width": 45, "depth": 35, "height": 1200 },
+      "visible": true,
+      "notes": "Divider between door bay and drawer bay."
+    },
+    {
+      "id": "right_front_stile",
+      "type": "rectangularExtrusion",
+      "name": "Right Front Stile",
+      "subcategory": "Frame",
+      "material": "Warm Walnut",
+      "origin": { "x": 1140, "y": -35, "z": 180 },
+      "dimensions": { "width": 60, "depth": 35, "height": 1200 },
+      "visible": true,
+      "notes": "Right vertical frame."
+    },
+    {
+      "id": "left_vertical_handle",
+      "type": "rectangularExtrusion",
+      "name": "Left Door Vertical Handle",
+      "subcategory": "Hardware",
+      "material": "Aged Brass",
+      "origin": { "x": 630, "y": -60, "z": 720 },
+      "dimensions": { "width": 22, "depth": 25, "height": 220 },
+      "visible": true,
+      "notes": "Simplified vertical pull."
+    },
+    {
+      "id": "drawer_handle_1",
+      "type": "rectangularExtrusion",
+      "name": "Top Drawer Handle",
+      "subcategory": "Hardware",
+      "material": "Aged Brass",
+      "origin": { "x": 855, "y": -60, "z": 1145 },
+      "dimensions": { "width": 170, "depth": 25, "height": 18 },
+      "visible": true,
+      "notes": "Simplified horizontal pull."
+    },
+    {
+      "id": "drawer_handle_2",
+      "type": "rectangularExtrusion",
+      "name": "Second Drawer Handle",
+      "subcategory": "Hardware",
+      "material": "Aged Brass",
+      "origin": { "x": 855, "y": -60, "z": 880 },
+      "dimensions": { "width": 170, "depth": 25, "height": 18 },
+      "visible": true,
+      "notes": "Simplified horizontal pull."
+    },
+    {
+      "id": "drawer_handle_3",
+      "type": "rectangularExtrusion",
+      "name": "Third Drawer Handle",
+      "subcategory": "Hardware",
+      "material": "Aged Brass",
+      "origin": { "x": 855, "y": -60, "z": 615 },
+      "dimensions": { "width": 170, "depth": 25, "height": 18 },
+      "visible": true,
+      "notes": "Simplified horizontal pull."
+    },
+    {
+      "id": "drawer_handle_4",
+      "type": "rectangularExtrusion",
+      "name": "Bottom Drawer Handle",
+      "subcategory": "Hardware",
+      "material": "Aged Brass",
+      "origin": { "x": 855, "y": -60, "z": 350 },
+      "dimensions": { "width": 170, "depth": 25, "height": 18 },
+      "visible": true,
+      "notes": "Simplified horizontal pull."
+    },
+    {
+      "id": "front_left_leg",
+      "type": "rectangularExtrusion",
+      "name": "Front Left Leg",
+      "subcategory": "Legs",
+      "material": "Warm Walnut",
+      "origin": { "x": 80, "y": -15, "z": 0 },
+      "dimensions": { "width": 55, "depth": 55, "height": "Leg Height" },
+      "visible": true,
+      "notes": "Rectangular placeholder for tapered angled leg."
+    },
+    {
+      "id": "front_right_leg",
+      "type": "rectangularExtrusion",
+      "name": "Front Right Leg",
+      "subcategory": "Legs",
+      "material": "Warm Walnut",
+      "origin": { "x": 1065, "y": -15, "z": 0 },
+      "dimensions": { "width": 55, "depth": 55, "height": "Leg Height" },
+      "visible": true,
+      "notes": "Rectangular placeholder for tapered angled leg."
+    },
+    {
+      "id": "back_left_leg",
+      "type": "rectangularExtrusion",
+      "name": "Back Left Leg",
+      "subcategory": "Legs",
+      "material": "Warm Walnut",
+      "origin": { "x": 80, "y": 380, "z": 0 },
+      "dimensions": { "width": 55, "depth": 55, "height": "Leg Height" },
+      "visible": true,
+      "notes": "Rectangular placeholder for rear leg."
+    },
+    {
+      "id": "back_right_leg",
+      "type": "rectangularExtrusion",
+      "name": "Back Right Leg",
+      "subcategory": "Legs",
+      "material": "Warm Walnut",
+      "origin": { "x": 1065, "y": 380, "z": 0 },
+      "dimensions": { "width": 55, "depth": 55, "height": "Leg Height" },
+      "visible": true,
+      "notes": "Rectangular placeholder for rear leg."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "formula",
+      "target": "Right",
+      "expression": "Width"
+    },
+    {
+      "type": "formula",
+      "target": "Back",
+      "expression": "Depth"
+    },
+    {
+      "type": "formula",
+      "target": "Top",
+      "expression": "Height"
+    }
+  ],
+  "assumptions": [
+    "Dimensions are defaulted because the image did not include a product specification.",
+    "Overall proportions were inferred visually from the image.",
+    "Wood grain, bevels, drawer gaps, and angled/tapered legs are approximated with rectangular extrusions.",
+    "The builder does not yet create flexing Revit parameters or constraints from the recipe."
+  ],
+  "clarifyingQuestions": [
+    "What are the actual product dimensions?",
+    "Should the left bay be one large door, two doors, or sliding panels?",
+    "Should drawer fronts be separated by real reveals/gaps or only visual front panels?",
+    "Should legs be angled/tapered solids once the builder supports tapered geometry?"
+  ],
+  "qa": {
+    "status": "needs_review",
+    "warnings": [
+      "Critical dimensions are defaulted from visual interpretation.",
+      "First-pass geometry is intentionally simplified.",
+      "Family should be rebuilt after actual product dimensions are supplied."
+    ]
+  }
+}
+
