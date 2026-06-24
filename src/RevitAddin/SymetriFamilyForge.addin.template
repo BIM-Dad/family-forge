@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Name>Symetri Family Forge - Build Family From Recipe</Name>
+    <Assembly>{ASSEMBLY_PATH}</Assembly>
+    <AddInId>6D80F20C-7C1C-4DB1-9DD8-2B83F7AF3C9D</AddInId>
+    <FullClassName>Symetri.FamilyForge.RevitAddin.BuildFamilyFromRecipeCommand</FullClassName>
+    <VendorId>SYMT</VendorId>
+    <VendorDescription>Symetri</VendorDescription>
+  </AddIn>
+</RevitAddIns>
+

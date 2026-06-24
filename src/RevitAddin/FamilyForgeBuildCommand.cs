@@ -1,6 +1,10 @@
 using System;
 using System.IO;
+#if NET48
+using System.Web.Script.Serialization;
+#else
 using System.Text.Json;
+#endif
 
 namespace Symetri.FamilyForge.RevitAddin;
 
@@ -22,12 +26,16 @@ public sealed class FamilyForgeBuildCommand
         try
         {
             var json = File.ReadAllText(recipePath);
+#if NET48
+            recipe = new JavaScriptSerializer().Deserialize<FamilyForgeRecipe>(json);
+#else
             recipe = JsonSerializer.Deserialize<FamilyForgeRecipe>(
                 json,
                 new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
+#endif
         }
         catch (Exception ex)
         {
@@ -98,4 +106,3 @@ public sealed class FamilyForgeRecipePreflight
         return result;
     }
 }
-

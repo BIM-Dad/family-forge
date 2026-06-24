@@ -35,7 +35,10 @@ Goal: build native Revit geometry from a validated recipe.
 
 Deliverables:
 
-- Revit add-in command: `Build Family From Recipe`.
+- Multi-version Revit add-in command: `Build Family From Recipe`.
+- Revit 2024 build target using .NET Framework 4.8.
+- Revit 2025-2026 build targets using `net8.0-windows`.
+- Revit 2027 build target using `net10.0-windows`.
 - Family template mapping.
 - Parameter creation.
 - Reference plane creation.
@@ -45,6 +48,8 @@ Deliverables:
 
 Success criteria:
 
+- Build add-in binaries for Revit 2024, 2025, 2026, and 2027.
+- Load the command in at least Revit 2024 and the newest installed Revit version.
 - Create one working non-hosted furniture family from the wardrobe sample recipe.
 - Flex width, depth, and height parameters without breaking geometry.
 - Generate a QA report listing warnings and assumptions.
@@ -85,4 +90,3 @@ Success criteria:
 - Client can generate a draft family without understanding the schema.
 - System blocks unsupported requests cleanly.
 - Symetri retains quality control and brand confidence.
-
