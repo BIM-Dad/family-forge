@@ -18,17 +18,20 @@ Visible features:
 
 ## Assumptions
 
-No measured dimensions were provided with the image, so the first recipe uses default dimensions:
+Measured overall dimensions were provided after the first image pass:
 
-- Width: 1200 mm
-- Depth: 450 mm
-- Body height: 1200 mm
-- Leg height: 180 mm
-- Overall height: 1380 mm
+- Width: 42 in / 1066.8 mm
+- Depth: 18 in / 457.2 mm
+- Overall height: 45 in / 1143 mm
+
+Internal dimensions are still inferred:
+
+- Body height: 990.6 mm
+- Leg height: 152.4 mm
+- Frame thickness: 38.1 mm
 
 The current Revit builder only supports rectangular extrusions, so angled legs, wood grain, bevels, shadows, and true drawer/door gaps are approximated with simple box geometry.
 
 ## Test Goal
 
 This test checks whether an image-derived recipe can create a recognizable native Revit family using the current Symetri Family Forge v0.1 builder.
-

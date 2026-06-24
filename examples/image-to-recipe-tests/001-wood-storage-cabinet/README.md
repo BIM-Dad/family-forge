@@ -25,8 +25,8 @@ The current builder should generate a native Revit Furniture family with:
 
 ## Known Simplifications
 
-- No actual product dimensions were supplied.
-- Cabinet proportions are inferred from the image.
+- Overall product dimensions were supplied: 42 in wide, 18 in deep, 45 in high.
+- Internal component proportions are inferred from the image.
 - Wood grain is represented only by material color.
 - Angled/tapered legs are simplified as rectangular posts.
 - Drawer gaps and bevels are approximate front-panel geometry.
@@ -40,4 +40,3 @@ The current builder should generate a native Revit Furniture family with:
 4. Confirm the generated `.rfa` is saved under this test folder's `generated` subfolder.
 5. Compare the resulting family against `source-image.png`.
 6. Record gaps or observations in `qa-notes.md`.
-
