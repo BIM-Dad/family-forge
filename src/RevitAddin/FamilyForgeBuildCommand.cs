@@ -153,7 +153,9 @@ public sealed class FamilyForgeBuildCommand
                 result,
                 templatePath,
                 outputPath,
-                builder.BuiltGeometryCount);
+                builder.BuiltGeometryCount,
+                builder.CreatedParameterCount,
+                builder.CreatedReferencePlaneCount);
 
             ActivateSavedFamily(uiApplication, familyDocument, outputPath, result);
 
@@ -231,7 +233,9 @@ public sealed class FamilyForgeBuildCommand
         FamilyForgeBuildResult preflight,
         string templatePath,
         string outputPath,
-        int geometryCount)
+        int geometryCount,
+        int parameterCount,
+        int referencePlaneCount)
     {
         var reportPath = Path.ChangeExtension(recipePath, ".family-forge-qa.md");
         var lines = new List<string>
@@ -243,10 +247,32 @@ public sealed class FamilyForgeBuildCommand
             $"Template: {templatePath}",
             $"Output Family: {outputPath}",
             $"Geometry Built: {geometryCount}",
+            $"Family Parameters Created: {parameterCount}",
+            $"Reference Planes Created: {referencePlaneCount}",
             $"Recipe QA Status: {recipe.Qa.Status}",
-            string.Empty,
-            "## Warnings"
+            string.Empty
         };
+
+        if (recipe.FamilyStrategy is not null)
+        {
+            lines.Add("## Family Strategy");
+            lines.Add($"- Template: {recipe.FamilyStrategy.Template ?? "Unspecified"}");
+            lines.Add($"- LOD Target: {recipe.FamilyStrategy.LodTarget ?? "Unspecified"}");
+            lines.Add($"- Category Reason: {recipe.FamilyStrategy.CategoryReason ?? "Unspecified"}");
+            lines.Add($"- Hosting Reason: {recipe.FamilyStrategy.HostingReason ?? "Unspecified"}");
+            lines.Add($"- Loadable Family Reason: {recipe.FamilyStrategy.LoadableFamilyReason ?? "Unspecified"}");
+            lines.Add($"- Scheduling Intent: {recipe.FamilyStrategy.ScheduleTagNeeds ?? "Unspecified"}");
+            lines.Add($"- Rendering Intent: {recipe.FamilyStrategy.RenderingNeeds ?? "Unspecified"}");
+            lines.Add(string.Empty);
+        }
+
+        AddStrategySection(lines, "Reference Plane Strategy", recipe.ReferencePlaneStrategy);
+        AddStrategySection(lines, "Parameter Strategy", recipe.ParameterStrategy);
+        AddNestedFamilySection(lines, recipe.NestedFamilies);
+        AddVisibilitySection(lines, recipe.VisibilityStrategy);
+        AddStringListSection(lines, "Publishing QA", recipe.PublishingQa);
+
+        lines.Add("## Warnings");
 
         var warnings = preflight.Warnings
             .Concat(recipe.Qa.Warnings)
@@ -275,6 +301,78 @@ public sealed class FamilyForgeBuildCommand
         }
 
         File.WriteAllLines(reportPath, lines);
+    }
+
+    private static void AddStrategySection(List<string> lines, string title, IReadOnlyList<StrategyItemSpec> items)
+    {
+        lines.Add("## " + title);
+        if (items.Count == 0)
+        {
+            lines.Add("- None");
+        }
+        else
+        {
+            foreach (var item in items)
+            {
+                var drives = string.IsNullOrWhiteSpace(item.Drives) ? string.Empty : $" Drives: {item.Drives}";
+                var notes = string.IsNullOrWhiteSpace(item.Notes) ? string.Empty : $" Notes: {item.Notes}";
+                lines.Add($"- {item.Name}: {item.Intent}{drives}{notes}");
+            }
+        }
+
+        lines.Add(string.Empty);
+    }
+
+    private static void AddNestedFamilySection(List<string> lines, IReadOnlyList<NestedFamilySpec> nestedFamilies)
+    {
+        lines.Add("## Nested Family Candidates");
+        if (nestedFamilies.Count == 0)
+        {
+            lines.Add("- None");
+        }
+        else
+        {
+            foreach (var nestedFamily in nestedFamilies)
+            {
+                var mappedParameters = nestedFamily.ParametersToMap.Count == 0
+                    ? "none listed"
+                    : string.Join(", ", nestedFamily.ParametersToMap);
+                lines.Add(
+                    $"- {nestedFamily.Name} ({nestedFamily.Status}): {nestedFamily.Purpose} Parameters to map: {mappedParameters}.");
+            }
+        }
+
+        lines.Add(string.Empty);
+    }
+
+    private static void AddVisibilitySection(List<string> lines, VisibilityStrategySpec? visibilityStrategy)
+    {
+        lines.Add("## Visibility Strategy");
+        if (visibilityStrategy is null)
+        {
+            lines.Add("- None");
+        }
+        else
+        {
+            lines.Add($"- Coarse: {visibilityStrategy.Coarse ?? "Unspecified"}");
+            lines.Add($"- Medium: {visibilityStrategy.Medium ?? "Unspecified"}");
+            lines.Add($"- Fine: {visibilityStrategy.Fine ?? "Unspecified"}");
+            lines.Add($"- Plan/RCP: {visibilityStrategy.PlanRcp ?? "Unspecified"}");
+            lines.Add("- Subcategories: " + (visibilityStrategy.Subcategories.Count == 0
+                ? "None"
+                : string.Join(", ", visibilityStrategy.Subcategories)));
+        }
+
+        lines.Add(string.Empty);
+    }
+
+    private static void AddStringListSection(List<string> lines, string title, IReadOnlyList<string> items)
+    {
+        lines.Add("## " + title);
+        lines.AddRange(items.Count == 0
+            ? new[] { "- None" }
+            : items.Select(item => "- " + item));
+        lines.Add(string.Empty);
     }
 }
 
@@ -329,8 +427,10 @@ internal sealed class FamilyForgeNativeBuilder
     private readonly FamilyForgeRecipe _recipe;
     private readonly Dictionary<string, double> _lengthParameters;
     private readonly Dictionary<string, ElementId> _materials = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, FamilyParameter> _familyParameters = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Category> _subcategories = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _elementNames = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _referencePlaneNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> _warnings = new();
 
     public FamilyForgeNativeBuilder(Document document, FamilyForgeRecipe recipe)
@@ -348,6 +448,8 @@ internal sealed class FamilyForgeNativeBuilder
 
     public IReadOnlyList<string> Warnings => _warnings;
     public int BuiltGeometryCount { get; private set; }
+    public int CreatedParameterCount { get; private set; }
+    public int CreatedReferencePlaneCount { get; private set; }
 
     public void Build()
     {
@@ -355,9 +457,288 @@ internal sealed class FamilyForgeNativeBuilder
         transaction.Start();
 
         CreateMaterials();
+        CreateFamilyParameters();
+        CreateReferencePlanes();
         CreateGeometry();
+        AddStrategyWarnings();
 
         transaction.Commit();
+    }
+
+    private void CreateFamilyParameters()
+    {
+        var manager = _document.FamilyManager;
+        EnsureFamilyType(manager);
+        CacheExistingFamilyParameters(manager);
+
+        foreach (var parameterSpec in _recipe.Parameters)
+        {
+            CreateFamilyParameter(manager, parameterSpec);
+        }
+
+        foreach (var materialSpec in _recipe.Materials)
+        {
+            if (string.IsNullOrWhiteSpace(materialSpec.ParameterName))
+            {
+                continue;
+            }
+
+            var parameterSpec = new FamilyParameterSpec
+            {
+                Name = materialSpec.ParameterName,
+                DataType = "material",
+                Value = materialSpec.Name,
+                Group = "Materials",
+                IsInstance = false,
+                Source = "recipe.materials"
+            };
+            CreateFamilyParameter(manager, parameterSpec);
+        }
+    }
+
+    private void EnsureFamilyType(FamilyManager manager)
+    {
+        if (manager.CurrentType is not null)
+        {
+            return;
+        }
+
+        try
+        {
+            manager.NewType(MakeRevitSafeName(_recipe.Family.Name));
+        }
+        catch (Exception ex)
+        {
+            _warnings.Add($"Could not create a named family type before parameter creation: {ex.Message}");
+        }
+    }
+
+    private void CacheExistingFamilyParameters(FamilyManager manager)
+    {
+        foreach (FamilyParameter parameter in manager.Parameters)
+        {
+            if (!string.IsNullOrWhiteSpace(parameter.Definition.Name))
+            {
+                _familyParameters[parameter.Definition.Name] = parameter;
+            }
+        }
+    }
+
+    private void CreateFamilyParameter(FamilyManager manager, FamilyParameterSpec parameterSpec)
+    {
+        if (string.IsNullOrWhiteSpace(parameterSpec.Name))
+        {
+            return;
+        }
+
+        if (_familyParameters.TryGetValue(parameterSpec.Name, out var existingParameter))
+        {
+            TrySetFamilyParameterValue(manager, existingParameter, parameterSpec);
+            return;
+        }
+
+        if (!TryAddFamilyParameter(manager, parameterSpec, out var parameter))
+        {
+            return;
+        }
+
+        _familyParameters[parameterSpec.Name] = parameter;
+        CreatedParameterCount++;
+        TrySetFamilyParameterValue(manager, parameter, parameterSpec);
+    }
+
+    private bool TryAddFamilyParameter(
+        FamilyManager manager,
+        FamilyParameterSpec parameterSpec,
+        out FamilyParameter parameter)
+    {
+        parameter = null!;
+
+        try
+        {
+            if (!TryMapParameterType(parameterSpec, out var groupTypeId, out var specTypeId))
+            {
+                _warnings.Add(
+                    $"Skipped family parameter '{parameterSpec.Name}' because data type '{parameterSpec.DataType}' is not implemented in this builder.");
+                return false;
+            }
+
+            parameter = manager.AddParameter(
+                parameterSpec.Name,
+                groupTypeId,
+                specTypeId,
+                parameterSpec.IsInstance);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _warnings.Add($"Could not create family parameter '{parameterSpec.Name}': {ex.Message}");
+            return false;
+        }
+    }
+
+    private void TrySetFamilyParameterValue(
+        FamilyManager manager,
+        FamilyParameter parameter,
+        FamilyParameterSpec parameterSpec)
+    {
+        if (parameterSpec.Value is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (string.Equals(parameterSpec.DataType, "length", StringComparison.OrdinalIgnoreCase))
+            {
+                manager.Set(parameter, ConvertLength(parameterSpec.Value, _recipe.Family.Units));
+            }
+            else if (string.Equals(parameterSpec.DataType, "material", StringComparison.OrdinalIgnoreCase)
+                     && _materials.TryGetValue(Convert.ToString(parameterSpec.Value, CultureInfo.InvariantCulture) ?? string.Empty, out var materialId))
+            {
+                manager.Set(parameter, materialId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _warnings.Add($"Could not set value for family parameter '{parameterSpec.Name}': {ex.Message}");
+        }
+    }
+
+    private static bool TryMapParameterType(
+        FamilyParameterSpec parameterSpec,
+        out ForgeTypeId groupTypeId,
+        out ForgeTypeId specTypeId)
+    {
+        groupTypeId = MapParameterGroup(parameterSpec.Group, parameterSpec.DataType);
+        specTypeId = parameterSpec.DataType.Trim().ToLowerInvariant() switch
+        {
+            "length" => SpecTypeId.Length,
+            "material" => SpecTypeId.Reference.Material,
+            _ => new ForgeTypeId()
+        };
+
+        return specTypeId != new ForgeTypeId();
+    }
+
+    private static ForgeTypeId MapParameterGroup(string group, string dataType)
+    {
+        if (string.Equals(dataType, "material", StringComparison.OrdinalIgnoreCase))
+        {
+            return GroupTypeId.Materials;
+        }
+
+        return group.Trim().ToLowerInvariant() switch
+        {
+            "constraints" => GroupTypeId.Constraints,
+            "materials" => GroupTypeId.Materials,
+            "identity data" => GroupTypeId.IdentityData,
+            _ => GroupTypeId.Geometry
+        };
+    }
+
+    private void CreateReferencePlanes()
+    {
+        var view = FindReferencePlaneView();
+        if (view is null)
+        {
+            _warnings.Add("Could not create recipe reference planes because no usable family view was found.");
+            return;
+        }
+
+        foreach (var referencePlane in _recipe.ReferencePlanes)
+        {
+            CreateReferencePlane(referencePlane, view);
+        }
+    }
+
+    private Autodesk.Revit.DB.View? FindReferencePlaneView()
+    {
+        return new FilteredElementCollector(_document)
+            .OfClass(typeof(Autodesk.Revit.DB.View))
+            .Cast<Autodesk.Revit.DB.View>()
+            .Where(view => !view.IsTemplate)
+            .OrderBy(view => view.ViewType == Autodesk.Revit.DB.ViewType.FloorPlan ? 0 : 1)
+            .FirstOrDefault(view => view.ViewType is Autodesk.Revit.DB.ViewType.FloorPlan
+                or Autodesk.Revit.DB.ViewType.CeilingPlan
+                or Autodesk.Revit.DB.ViewType.Elevation
+                or Autodesk.Revit.DB.ViewType.ThreeD);
+    }
+
+    private void CreateReferencePlane(ReferencePlaneSpec referencePlaneSpec, Autodesk.Revit.DB.View view)
+    {
+        if (string.IsNullOrWhiteSpace(referencePlaneSpec.Name))
+        {
+            return;
+        }
+
+        if (!_referencePlaneNames.Add(referencePlaneSpec.Name))
+        {
+            _warnings.Add($"Skipped duplicate reference plane '{referencePlaneSpec.Name}'.");
+            return;
+        }
+
+        var offset = ResolveLength(referencePlaneSpec.Offset, "referencePlane.offset", referencePlaneSpec.Name);
+        var width = ResolveLengthParameter("Width", 1000);
+        var depth = ResolveLengthParameter("Depth", 500);
+        var height = ResolveLengthParameter("Height", 1000);
+
+        var orientation = referencePlaneSpec.Orientation.Trim().ToLowerInvariant();
+        var bubbleEnd = XYZ.Zero;
+        var freeEnd = XYZ.BasisX;
+        var cutVector = XYZ.BasisZ;
+
+        switch (orientation)
+        {
+            case "leftright":
+                bubbleEnd = new XYZ(offset, 0, 0);
+                freeEnd = new XYZ(offset, depth, 0);
+                cutVector = XYZ.BasisZ;
+                break;
+            case "frontback":
+                bubbleEnd = new XYZ(0, offset, 0);
+                freeEnd = new XYZ(width, offset, 0);
+                cutVector = XYZ.BasisZ;
+                break;
+            case "vertical":
+                bubbleEnd = new XYZ(0, 0, offset);
+                freeEnd = new XYZ(width, 0, offset);
+                cutVector = XYZ.BasisY;
+                break;
+            default:
+                _warnings.Add(
+                    $"Skipped reference plane '{referencePlaneSpec.Name}' because orientation '{referencePlaneSpec.Orientation}' is not supported.");
+                return;
+        }
+
+        try
+        {
+            var referencePlane = _document.FamilyCreate.NewReferencePlane(
+                bubbleEnd,
+                freeEnd,
+                cutVector,
+                view);
+
+            referencePlane.Name = MakeRevitSafeName(referencePlaneSpec.Name);
+            CreatedReferencePlaneCount++;
+
+            if (referencePlaneSpec.IsStrongReference)
+            {
+                _warnings.Add(
+                    $"Created reference plane '{referencePlaneSpec.Name}', but strong-reference assignment is not implemented for this Revit API target yet.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _warnings.Add($"Could not create reference plane '{referencePlaneSpec.Name}': {ex.Message}");
+        }
+    }
+
+    private double ResolveLengthParameter(string parameterName, double fallbackMillimeters)
+    {
+        return _lengthParameters.TryGetValue(parameterName, out var value)
+            ? value
+            : ConvertLength(fallbackMillimeters, "mm");
     }
 
     private void CreateMaterials()
@@ -377,6 +758,30 @@ internal sealed class FamilyForgeNativeBuilder
             }
 
             _materials[materialSpec.Name] = materialId;
+        }
+    }
+
+    private void AddStrategyWarnings()
+    {
+        if (_recipe.ReferencePlaneStrategy.Count > 0 && CreatedReferencePlaneCount > 0 && BuiltGeometryCount > 0)
+        {
+            _warnings.Add(
+                "Created recipe reference planes, but geometry is not locked/aligned to those planes yet. Treat generated solids as first-pass authored geometry.");
+        }
+
+        foreach (var nestedFamily in _recipe.NestedFamilies)
+        {
+            if (nestedFamily.Status is "recommended" or "required")
+            {
+                _warnings.Add(
+                    $"Nested family '{nestedFamily.Name}' is {nestedFamily.Status} but is not created or placed by the current builder. Purpose: {nestedFamily.Purpose}");
+            }
+        }
+
+        if (_recipe.ParameterStrategy.Count > 0 && CreatedParameterCount > 0)
+        {
+            _warnings.Add(
+                "Created family parameters from the recipe, but geometry dimensions are not yet associated to those parameters through Revit constraints.");
         }
     }
 
