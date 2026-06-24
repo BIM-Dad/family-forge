@@ -1,0 +1,126 @@
+# Symetri Family Forge Architecture
+
+## Design Principles
+
+- Connector-agnostic: any AI system can participate if it can output the recipe schema.
+- Inspectable: the AI output is plain JSON and can be reviewed before Revit work begins.
+- BIM-first: native Revit behavior matters more than visual novelty.
+- Human-approvable: the system should ask questions instead of inventing critical dimensions.
+- Versioned contract: recipes declare a schema version so builders can evolve safely.
+
+## Pipeline
+
+```mermaid
+flowchart TD
+    A["Source Material"] --> B["AI Connector Prompt Pack"]
+    B --> C["family_recipe.json"]
+    C --> D["Schema Validation"]
+    D --> E["BIM QA Rules"]
+    E --> F{"Approved?"}
+    F -->|"No"| G["Clarifying Questions / Recipe Edits"]
+    G --> C
+    F -->|"Yes"| H["Revit Builder Add-in"]
+    H --> I["Native Revit Family"]
+    H --> J["QA Report"]
+```
+
+## Components
+
+### AI Connector
+
+The AI connector may be Claude, ChatGPT, Gemini, Copilot, an OpenAI-compatible local model, or a future internal Symetri connector. The connector only needs to produce JSON matching the recipe schema.
+
+The connector must not be treated as the system of record. Its output is draft intent until validation and review are complete.
+
+### Recipe Schema
+
+The schema is the central contract. It describes:
+
+- Family identity and category.
+- Hosting behavior.
+- Units.
+- Parameters.
+- Reference planes.
+- Materials.
+- Geometry primitives.
+- Constraints.
+- Source assumptions.
+- Clarifying questions.
+- QA status.
+
+### Validator
+
+The validator checks structural correctness and BIM-oriented rules before Revit receives the recipe.
+
+Early validation examples:
+
+- Required dimensions exist.
+- Unsupported geometry types are rejected.
+- Critical inferred dimensions are flagged.
+- Parameter names are valid and unique.
+- Materials referenced by geometry exist.
+- Hosted behavior is supported by the selected template.
+
+### Revit Builder
+
+The Revit builder consumes an approved recipe and creates native family content. The initial builder should prioritize a small, reliable set of primitives:
+
+- Extrusions.
+- Void extrusions.
+- Cylinders and sweeps, if needed.
+- Material parameters.
+- Family parameters.
+- Reference planes.
+- Basic constraints.
+
+The first implementation can be a Revit add-in command named `Build Family From Recipe`.
+
+### QA Report
+
+Each build should produce a report listing:
+
+- Recipe schema version.
+- Source assumptions.
+- Generated parameters.
+- Generated geometry count.
+- Unsupported or skipped instructions.
+- Warnings requiring human review.
+- Pass/fail status for delivery.
+
+## MVP Scope
+
+The first version should support furniture and simple generic model families. This gives Symetri an impressive but controlled proof point.
+
+Included:
+
+- Non-hosted family template selection.
+- Length, material, text, and yes/no parameters.
+- Rectangular extrusions.
+- Simple repeated panels or shelves.
+- Material assignment.
+- Named reference planes.
+- QA summary.
+
+Deferred:
+
+- MEP connectors.
+- Advanced hosting.
+- Nested families.
+- Complex formulas.
+- Imported mesh conversion.
+- Parametric curves.
+- Adaptive components.
+
+## Service Model
+
+The fastest path to value is internal service acceleration:
+
+1. Symetri receives source material from a client.
+2. A consultant uses an AI connector to generate a recipe.
+3. The validator flags gaps.
+4. A BIM specialist answers or corrects the recipe.
+5. The builder creates the draft family.
+6. The specialist flexes, reviews, and delivers the family with a QA report.
+
+This creates learning data before a self-service client product is exposed.
+

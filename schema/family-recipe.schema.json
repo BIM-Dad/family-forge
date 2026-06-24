@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://symetri.com/iris/symetri-family-forge/family-recipe.schema.json",
+  "title": "Symetri Family Forge Recipe",
+  "description": "Connector-agnostic recipe for generating a native Revit family.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "family",
+    "parameters",
+    "referencePlanes",
+    "materials",
+    "geometry",
+    "qa"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "family": {
+      "type": "object",
+      "required": ["name", "category", "hosting", "units"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9_\\-]+$"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "Furniture",
+            "Generic Models",
+            "Casework",
+            "Specialty Equipment"
+          ]
+        },
+        "hosting": {
+          "type": "string",
+          "enum": [
+            "NonHosted",
+            "FaceBased",
+            "WallBased",
+            "CeilingBased",
+            "FloorBased",
+            "RoofBased"
+          ]
+        },
+        "units": {
+          "type": "string",
+          "enum": ["mm", "in"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "sourceType": {
+          "type": "string",
+          "enum": ["image", "pdf", "sketch", "text", "mixed"]
+        }
+      }
+    },
+    "parameters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/parameter"
+      }
+    },
+    "referencePlanes": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "$ref": "#/$defs/referencePlane"
+      }
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/material"
+      }
+    },
+    "geometry": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/geometry"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/constraint"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "clarifyingQuestions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "qa": {
+      "type": "object",
+      "required": ["status", "warnings"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["draft", "needs_review", "approved_for_build"]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "parameter": {
+      "type": "object",
+      "required": ["name", "dataType", "value", "group", "isInstance"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_ ]*$"
+        },
+        "dataType": {
+          "type": "string",
+          "enum": ["length", "material", "text", "integer", "number", "yesno"]
+        },
+        "value": {
+          "oneOf": [
+            { "type": "number" },
+            { "type": "string" },
+            { "type": "integer" },
+            { "type": "boolean" }
+          ]
+        },
+        "group": {
+          "type": "string"
+        },
+        "isInstance": {
+          "type": "boolean"
+        },
+        "formula": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["provided", "inferred", "defaulted"]
+        }
+      }
+    },
+    "referencePlane": {
+      "type": "object",
+      "required": ["name", "orientation", "offset"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "orientation": {
+          "type": "string",
+          "enum": ["leftRight", "frontBack", "vertical"]
+        },
+        "offset": {
+          "oneOf": [
+            { "type": "number" },
+            { "type": "string" }
+          ]
+        },
+        "isStrongReference": {
+          "type": "boolean"
+        }
+      }
+    },
+    "material": {
+      "type": "object",
+      "required": ["name", "color"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "parameterName": {
+          "type": "string"
+        }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "required": ["id", "type", "name", "material", "origin", "dimensions"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_\\-]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["rectangularExtrusion", "voidRectangularExtrusion", "cylinder"]
+        },
+        "name": {
+          "type": "string"
+        },
+        "subcategory": {
+          "type": "string"
+        },
+        "material": {
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/point3"
+        },
+        "dimensions": {
+          "type": "object",
+          "required": ["width", "depth", "height"],
+          "additionalProperties": false,
+          "properties": {
+            "width": {
+              "oneOf": [{ "type": "number" }, { "type": "string" }]
+            },
+            "depth": {
+              "oneOf": [{ "type": "number" }, { "type": "string" }]
+            },
+            "height": {
+              "oneOf": [{ "type": "number" }, { "type": "string" }]
+            }
+          }
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "required": ["type", "target", "expression"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["align", "lock", "formula", "equalSpacing"]
+        },
+        "target": {
+          "type": "string"
+        },
+        "expression": {
+          "type": "string"
+        }
+      }
+    },
+    "point3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "oneOf": [{ "type": "number" }, { "type": "string" }]
+        },
+        "y": {
+          "oneOf": [{ "type": "number" }, { "type": "string" }]
+        },
+        "z": {
+          "oneOf": [{ "type": "number" }, { "type": "string" }]
+        }
+      }
+    }
+  }
+}
+
