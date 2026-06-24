@@ -16,6 +16,7 @@ Goal: prove that multiple AI connectors can produce the same valid recipe format
 Deliverables:
 
 - `family-recipe.schema.json` v0.1.
+- Revit family best-practices standard for AI recipe generation.
 - Generic prompt pack.
 - Claude prompt variant.
 - ChatGPT / OpenAI prompt variant.
@@ -50,6 +51,14 @@ Deliverables:
 - Parameter creation.
 - Reference plane creation.
 
+Success criteria:
+
+- Build add-in binaries for Revit 2024, 2025, 2026, and 2027.
+- Load the command in at least Revit 2024 and the newest installed Revit version.
+- Create one working non-hosted furniture family from the wardrobe sample recipe.
+- Flex width, depth, and height parameters without breaking geometry.
+- Generate a QA report listing warnings and assumptions.
+
 ## Phase 2.5: Furniture Fidelity Primitives
 
 Goal: move from recognizable massing to BIM-authored furniture logic.
@@ -69,13 +78,24 @@ Success criteria:
 - Test 001 rebuild uses sweeps for pulls with end returns.
 - Test 001 front frame reads as profiled trim instead of stacked rectangular blocks.
 
+## Phase 2.6: Constraint And Nesting Foundation
+
+Goal: make generated families behave like authored Revit families instead of unassociated solids.
+
+Deliverables:
+
+- Revit family parameter creation.
+- Reference plane creation from recipe.
+- Geometry association/locking strategy.
+- Hosted panel placement from reference planes.
+- Nested family placement for pulls, legs, hinges, and repeated hardware.
+- QA warnings for unassociated geometry.
+
 Success criteria:
 
-- Build add-in binaries for Revit 2024, 2025, 2026, and 2027.
-- Load the command in at least Revit 2024 and the newest installed Revit version.
-- Create one working non-hosted furniture family from the wardrobe sample recipe.
-- Flex width, depth, and height parameters without breaking geometry.
-- Generate a QA report listing warnings and assumptions.
+- Test 001 includes Width, Depth, Height, Panel Thickness, Reveal Gap, and Hardware Offset as Revit family parameters.
+- Test 001 geometry is controlled from named reference planes where supported.
+- Pulls are represented as nested hardware families or a documented nested-family placeholder.
 
 ## Phase 3: Service Pilot
 

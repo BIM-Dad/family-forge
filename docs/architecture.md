@@ -75,6 +75,15 @@ The Revit builder consumes an approved recipe and creates native family content.
 
 The first implementation can be a Revit add-in command named `Build Family From Recipe`.
 
+Future builder work should align with [Revit Family Best Practices](revit-family-best-practices.md). The builder should move away from orphaned geometry and toward:
+
+- Creating reference planes from the recipe.
+- Creating named Revit family parameters.
+- Associating geometry to reference planes where the Revit API supports it.
+- Using nested families for repeated hardware and reusable components.
+- Reporting any geometry that remains unassociated.
+- Preserving ideal modeling intent when the current builder must use an approximation.
+
 ### QA Report
 
 Each build should produce a report listing:
@@ -123,4 +132,3 @@ The fastest path to value is internal service acceleration:
 6. The specialist flexes, reviews, and delivers the family with a QA report.
 
 This creates learning data before a self-service client product is exposed.
-

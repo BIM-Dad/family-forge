@@ -7,6 +7,8 @@ You are producing a Symetri Family Forge recipe.
 
 Analyze the attached source material and create a connector-agnostic JSON recipe for a native Revit family. Do not produce Revit API code. Output JSON only.
 
+Follow the Symetri Family Forge Revit family best-practices standard: reference planes first, named parameters, associated geometry intent, nested families for reusable hardware, clean subcategories/materials, and clear notes when the current v0.1 geometry is only an approximation.
+
 The recipe must follow schemaVersion 0.1 and include:
 - family name, category, hosting, units, description, and sourceType
 - parameters with name, dataType, value, group, isInstance, and source
@@ -18,6 +20,8 @@ The recipe must follow schemaVersion 0.1 and include:
 - rectangularExtrusion geometry for flat bar pulls and squared hardware
 - intent and notes describing the ideal BIM modeling strategy when v0.1 geometry is only an approximation
 - explicit notes for elements that should later become blends, sweeps, swept blends, reveals, recessed panels, or nested hardware families
+- reference planes for overall bounds, centerlines, reveals, hardware positions, face frames, dividers, shelves, and leg centers where applicable
+- named parameters for dimensions, materials, panel thickness, reveal gaps, hardware offsets, and leg heights when applicable
 - constraints when useful
 - assumptions
 - clarifyingQuestions
