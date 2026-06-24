@@ -7,6 +7,12 @@ public sealed class FamilyForgeRecipe
     public string SchemaVersion { get; set; } = "0.1";
     public FamilyInfo Family { get; set; } = new();
     public List<FamilyParameterSpec> Parameters { get; set; } = new();
+    public FamilyStrategySpec? FamilyStrategy { get; set; }
+    public List<StrategyItemSpec> ReferencePlaneStrategy { get; set; } = new();
+    public List<StrategyItemSpec> ParameterStrategy { get; set; } = new();
+    public List<NestedFamilySpec> NestedFamilies { get; set; } = new();
+    public VisibilityStrategySpec? VisibilityStrategy { get; set; }
+    public List<string> PublishingQa { get; set; } = new();
     public List<ReferencePlaneSpec> ReferencePlanes { get; set; } = new();
     public List<MaterialSpec> Materials { get; set; } = new();
     public List<GeometrySpec> Geometry { get; set; } = new();
@@ -35,6 +41,43 @@ public sealed class FamilyParameterSpec
     public bool IsInstance { get; set; }
     public string? Formula { get; set; }
     public string? Source { get; set; }
+}
+
+public sealed class FamilyStrategySpec
+{
+    public string? Template { get; set; }
+    public string? CategoryReason { get; set; }
+    public string? HostingReason { get; set; }
+    public string? LoadableFamilyReason { get; set; }
+    public string? LodTarget { get; set; }
+    public string? ScheduleTagNeeds { get; set; }
+    public string? RenderingNeeds { get; set; }
+}
+
+public sealed class StrategyItemSpec
+{
+    public string Name { get; set; } = string.Empty;
+    public string Intent { get; set; } = string.Empty;
+    public string? Drives { get; set; }
+    public string? Notes { get; set; }
+}
+
+public sealed class NestedFamilySpec
+{
+    public string Name { get; set; } = string.Empty;
+    public string Purpose { get; set; } = string.Empty;
+    public string Status { get; set; } = "recommended";
+    public List<string> ParametersToMap { get; set; } = new();
+    public string? Notes { get; set; }
+}
+
+public sealed class VisibilityStrategySpec
+{
+    public string? Coarse { get; set; }
+    public string? Medium { get; set; }
+    public string? Fine { get; set; }
+    public string? PlanRcp { get; set; }
+    public List<string> Subcategories { get; set; } = new();
 }
 
 public sealed class ReferencePlaneSpec

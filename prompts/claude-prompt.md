@@ -9,7 +9,7 @@ Please inspect the attached source material and produce JSON only. Do not includ
 
 The output must be a connector-agnostic recipe that another tool can validate and use to build native Revit geometry.
 
-Follow the Symetri Family Forge Revit family best-practices standard: reference planes first, named parameters, associated geometry intent, nested families for reusable hardware, clean subcategories/materials, and clear notes when the current v0.1 geometry is only an approximation.
+Follow the Symetri Family Forge Revit family best-practices standard and training context: use docs/revit-content-creation-ai-context.md as source context and docs/revit-family-best-practices.md as the operational checklist. Model reference planes first, named parameters, associated geometry intent, nested families for reusable hardware, clean subcategories/materials, and clear notes when the current v0.1 geometry is only an approximation.
 
 Rules:
 1. Use schemaVersion "0.1".
@@ -26,8 +26,10 @@ Rules:
 12. Include Width, Depth, and Height parameters when applicable.
 13. Include material, panel thickness, reveal gap, hardware offset, and leg height parameters where applicable.
 14. Include materials and subcategories.
-15. Include assumptions and qa warnings.
-16. Set qa.status to "needs_review" unless the source material fully defines the family.
+15. Include familyStrategy with template, category reason, hosting reason, reusability/loadable-family rationale, lodTarget, scheduling intent, and rendering intent.
+16. Include referencePlaneStrategy, parameterStrategy, nestedFamilies, visibilityStrategy, and publishingQa.
+17. Include assumptions and qa warnings.
+18. Set qa.status to "needs_review" unless the source material fully defines the family.
 
 Family request:
 <insert request here>

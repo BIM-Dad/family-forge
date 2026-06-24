@@ -17,6 +17,8 @@ Deliverables:
 
 - `family-recipe.schema.json` v0.1.
 - Revit family best-practices standard for AI recipe generation.
+- Imported Revit content creation training context for AI recipe generation.
+- Recipe strategy sections for family strategy, reference plane strategy, parameter strategy, nested family candidates, visibility, and publishing QA.
 - Generic prompt pack.
 - Claude prompt variant.
 - ChatGPT / OpenAI prompt variant.

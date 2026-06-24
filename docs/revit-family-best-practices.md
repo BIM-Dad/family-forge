@@ -173,6 +173,12 @@ Every AI-generated recipe should include:
 
 - Provided dimensions.
 - Inferred dimensions.
+- `familyStrategy` describing template, category, hosting, reusable/loadable-family intent, LOD target, scheduling intent, and rendering intent.
+- `referencePlaneStrategy` describing the reference framework before geometry.
+- `parameterStrategy` describing which named parameters should drive which geometry or nested parts.
+- `nestedFamilies` for reusable handles, pulls, legs, hinges, modules, or hardware.
+- `visibilityStrategy` describing coarse, medium, fine, plan/RCP, and subcategory behavior.
+- `publishingQa` listing final delivery checks.
 - Assumptions.
 - Clarifying questions.
 - QA warnings.
@@ -193,4 +199,3 @@ The builder needs these capabilities to better match this standard:
 - Support nested family placement.
 - Support reveal/setback patterns.
 - Create type catalogs or multiple family types.
-

@@ -40,8 +40,14 @@ The schema is the central contract. It describes:
 - Hosting behavior.
 - Units.
 - Parameters.
+- Family authoring strategy.
+- Reference plane strategy.
+- Parameter association strategy.
 - Reference planes.
 - Materials.
+- Nested family candidates.
+- Visibility/detail-level strategy.
+- Publishing QA checklist.
 - Geometry primitives.
 - Constraints.
 - Source assumptions.

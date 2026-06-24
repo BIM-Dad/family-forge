@@ -74,6 +74,106 @@
       "source": "inferred"
     }
   ],
+  "familyStrategy": {
+    "template": "Metric Furniture.rft",
+    "categoryReason": "Furniture is appropriate because the object is freestanding movable storage content.",
+    "hostingReason": "Non-hosted because the cabinet does not cut or depend on a wall, floor, ceiling, roof, or face host.",
+    "loadableFamilyReason": "This is reusable furniture content that may be loaded, placed, scheduled, and reused across projects.",
+    "lodTarget": "medium",
+    "scheduleTagNeeds": "Overall dimensions, finish/materials, and type name should be schedule-ready in a future builder pass.",
+    "renderingNeeds": "Wood finish and brass hardware should be material-controlled; detailed wood grain is out of scope for v0.1."
+  },
+  "referencePlaneStrategy": [
+    {
+      "name": "Left/Right",
+      "intent": "Control overall width and side panel locations.",
+      "drives": "Left and right side panels, front frame, drawer bay, door bay."
+    },
+    {
+      "name": "Front/Back",
+      "intent": "Control overall depth, front face frame, recessed panel plane, and back panel.",
+      "drives": "Case panels, door/drawer setbacks, hardware offsets."
+    },
+    {
+      "name": "Bottom/Top",
+      "intent": "Control overall height, leg zone, body zone, and top panel.",
+      "drives": "Legs, body panels, top/bottom panels."
+    },
+    {
+      "name": "Door Drawer Split",
+      "intent": "Control the vertical divider between the door bay and drawer stack.",
+      "drives": "Central divider, left doors, right drawer fronts."
+    },
+    {
+      "name": "Hardware Centerlines",
+      "intent": "Future builder should place pull nested families or sweeps from named centerline planes.",
+      "drives": "Door pull and drawer pulls."
+    }
+  ],
+  "parameterStrategy": [
+    {
+      "name": "Width",
+      "intent": "Type parameter for product width.",
+      "drives": "Overall left/right reference planes and dependent panels."
+    },
+    {
+      "name": "Depth",
+      "intent": "Type parameter for product depth.",
+      "drives": "Overall front/back reference planes and panel depths."
+    },
+    {
+      "name": "Height",
+      "intent": "Type parameter for product height.",
+      "drives": "Overall top/bottom reference planes."
+    },
+    {
+      "name": "Panel Thickness",
+      "intent": "Type parameter for side, top, bottom, back, door, drawer, and face-frame thickness logic.",
+      "drives": "Panel geometry and inset relationships.",
+      "notes": "Current recipe uses fixed values until builder supports formulas and locks."
+    },
+    {
+      "name": "Reveal Gap",
+      "intent": "Type parameter controlling minimal gaps between doors, drawers, and face frame.",
+      "drives": "Door/drawer panel offsets and spacing.",
+      "notes": "Target default should be 1/8 in to 1/4 in."
+    },
+    {
+      "name": "Hardware Offset",
+      "intent": "Type parameter controlling pull placement from panel edges or centerlines.",
+      "drives": "Nested hardware placement."
+    }
+  ],
+  "nestedFamilies": [
+    {
+      "name": "Cabinet_Bar_Pull_With_Returns",
+      "purpose": "Reusable pull family or sweep-based nested family with end returns back to the door/drawer face.",
+      "status": "recommended",
+      "parametersToMap": ["Hardware Material", "Hardware Offset"],
+      "notes": "Current recipe approximates pulls with rectangular extrusions."
+    },
+    {
+      "name": "Tapered_Round_Cabinet_Leg",
+      "purpose": "Reusable tapered blend leg family placed from leg centerline reference planes.",
+      "status": "recommended",
+      "parametersToMap": ["Leg Height", "Door Material"],
+      "notes": "Current recipe approximates legs with rectangular extrusions."
+    }
+  ],
+  "visibilityStrategy": {
+    "coarse": "Simplified rectangular cabinet outline and leg massing.",
+    "medium": "Panelized body, doors, drawers, frame, pulls, and legs.",
+    "fine": "Future sweep/blend details, bevels, pull returns, and refined reveals.",
+    "planRcp": "Future plan symbol or simplified top projection should avoid excessive hardware detail.",
+    "subcategories": ["Case Panels", "Doors", "Drawers", "Frame", "Hardware", "Legs"]
+  },
+  "publishingQa": [
+    "Flex width, depth, and height after reference-plane and parameter support is implemented.",
+    "Verify pulls are nested or sweep-based before production use.",
+    "Verify legs are tapered blends before production use.",
+    "Verify no unassociated geometry remains before library publishing.",
+    "Verify materials are exposed as user-facing material parameters."
+  ],
   "referencePlanes": [
     {
       "name": "Left",

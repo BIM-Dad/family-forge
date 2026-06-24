@@ -77,6 +77,23 @@ def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
             if value <= 0:
                 warnings.append(f"Length parameter '{name}' must be greater than zero.")
 
+    if not recipe.get("familyStrategy"):
+        warnings.append("Missing recommended familyStrategy section.")
+    if not recipe.get("referencePlaneStrategy"):
+        warnings.append("Missing recommended referencePlaneStrategy section.")
+    if not recipe.get("parameterStrategy"):
+        warnings.append("Missing recommended parameterStrategy section.")
+
+    nested_families = recipe.get("nestedFamilies", [])
+    if isinstance(nested_families, list):
+        for nested in nested_families:
+            if not isinstance(nested, dict):
+                continue
+            if nested.get("status") in {"recommended", "required"}:
+                warnings.append(
+                    f"Nested family candidate '{nested.get('name', '<unnamed>')}' is {nested.get('status')}: {nested.get('purpose', '')}"
+                )
+
     materials = recipe.get("materials", [])
     material_names = {item.get("name") for item in materials if isinstance(item, dict)}
 

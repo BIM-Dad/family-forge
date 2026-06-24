@@ -69,6 +69,36 @@
         "$ref": "#/$defs/parameter"
       }
     },
+    "familyStrategy": {
+      "$ref": "#/$defs/familyStrategy"
+    },
+    "referencePlaneStrategy": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/strategyItem"
+      }
+    },
+    "parameterStrategy": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/strategyItem"
+      }
+    },
+    "nestedFamilies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nestedFamily"
+      }
+    },
+    "visibilityStrategy": {
+      "$ref": "#/$defs/visibilityStrategy"
+    },
+    "publishingQa": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "referencePlanes": {
       "type": "array",
       "minItems": 6,
@@ -126,6 +156,103 @@
     }
   },
   "$defs": {
+    "familyStrategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "template": {
+          "type": "string"
+        },
+        "categoryReason": {
+          "type": "string"
+        },
+        "hostingReason": {
+          "type": "string"
+        },
+        "loadableFamilyReason": {
+          "type": "string"
+        },
+        "lodTarget": {
+          "type": "string",
+          "enum": ["coarse", "medium", "fine", "mixed"]
+        },
+        "scheduleTagNeeds": {
+          "type": "string"
+        },
+        "renderingNeeds": {
+          "type": "string"
+        }
+      }
+    },
+    "strategyItem": {
+      "type": "object",
+      "required": ["name", "intent"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "intent": {
+          "type": "string"
+        },
+        "drives": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "nestedFamily": {
+      "type": "object",
+      "required": ["name", "purpose", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["recommended", "required", "deferred", "not_needed"]
+        },
+        "parametersToMap": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "visibilityStrategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "coarse": {
+          "type": "string"
+        },
+        "medium": {
+          "type": "string"
+        },
+        "fine": {
+          "type": "string"
+        },
+        "planRcp": {
+          "type": "string"
+        },
+        "subcategories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "parameter": {
       "type": "object",
       "required": ["name", "dataType", "value", "group", "isInstance"],
