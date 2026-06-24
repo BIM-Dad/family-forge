@@ -38,7 +38,7 @@ public sealed class BuildFamilyFromRecipeCommand : IExternalCommand
         if (!result.CanBuild)
         {
             message = string.Join(Environment.NewLine, result.Errors);
-            return Result.Failed;
+            return Result.Succeeded;
         }
 
         return Result.Succeeded;

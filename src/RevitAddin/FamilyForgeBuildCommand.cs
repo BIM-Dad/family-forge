@@ -257,6 +257,7 @@ internal sealed class FamilyForgeNativeBuilder
     private readonly Dictionary<string, double> _lengthParameters;
     private readonly Dictionary<string, ElementId> _materials = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Category> _subcategories = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _elementNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> _warnings = new();
 
     public FamilyForgeNativeBuilder(Document document, FamilyForgeRecipe recipe)
@@ -290,7 +291,12 @@ internal sealed class FamilyForgeNativeBuilder
     {
         foreach (var materialSpec in _recipe.Materials)
         {
-            var materialId = Material.Create(_document, materialSpec.Name);
+            var materialId = FindMaterialId(materialSpec.Name);
+            if (materialId == ElementId.InvalidElementId)
+            {
+                materialId = Material.Create(_document, materialSpec.Name);
+            }
+
             var material = _document.GetElement(materialId) as Material;
             if (material is not null)
             {
@@ -348,7 +354,7 @@ internal sealed class FamilyForgeNativeBuilder
                 sketchPlane,
                 height);
 
-            extrusion.Name = geometry.Name;
+            TrySetUniqueElementName(extrusion, geometry);
 
             ApplyMaterial(extrusion, geometry.Material);
             ApplySubcategory(extrusion, geometry.Subcategory);
@@ -357,12 +363,74 @@ internal sealed class FamilyForgeNativeBuilder
         }
     }
 
+    private ElementId FindMaterialId(string materialName)
+    {
+        var existingMaterial = new FilteredElementCollector(_document)
+            .OfClass(typeof(Material))
+            .Cast<Material>()
+            .FirstOrDefault(material => string.Equals(
+                material.Name,
+                materialName,
+                StringComparison.OrdinalIgnoreCase));
+
+        return existingMaterial?.Id ?? ElementId.InvalidElementId;
+    }
+
+    private void TrySetUniqueElementName(Element element, GeometrySpec geometry)
+    {
+        var baseName = MakeRevitSafeName(
+            string.IsNullOrWhiteSpace(geometry.Name) ? geometry.Id : geometry.Name);
+
+        for (var index = 0; index < 25; index++)
+        {
+            var candidate = index == 0
+                ? baseName
+                : $"{baseName}_{geometry.Id}_{index}";
+
+            if (!_elementNames.Add(candidate))
+            {
+                continue;
+            }
+
+            try
+            {
+                element.Name = candidate;
+                return;
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException)
+            {
+                // Revit may know about names that are not obvious through this builder.
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+            {
+                _warnings.Add(
+                    $"Revit did not allow a custom name for geometry '{geometry.Id}'. The default element name was kept.");
+                return;
+            }
+        }
+
+        _warnings.Add(
+            $"Could not assign a unique custom name for geometry '{geometry.Id}'. The default element name was kept.");
+    }
+
+    private static string MakeRevitSafeName(string value)
+    {
+        var safe = new string(value
+            .Select(character => char.IsLetterOrDigit(character) || character is ' ' or '_' or '-'
+                ? character
+                : '_')
+            .ToArray())
+            .Trim();
+
+        return string.IsNullOrWhiteSpace(safe) ? "Family Forge Geometry" : safe;
+    }
+
     private void ApplyMaterial(Element element, string materialName)
     {
         if (!_materials.TryGetValue(materialName, out var materialId))
         {
             _warnings.Add(
-                $"Material '{materialName}' was not found for element '{element.Name}'.");
+                $"Material '{materialName}' was not found for one generated element.");
             return;
         }
 
@@ -383,9 +451,15 @@ internal sealed class FamilyForgeNativeBuilder
         if (!_subcategories.TryGetValue(subcategoryName, out var subcategory))
         {
             var parentCategory = _document.OwnerFamily.FamilyCategory;
-            subcategory = _document.Settings.Categories.NewSubcategory(
-                parentCategory,
-                subcategoryName);
+            subcategory = parentCategory.SubCategories
+                .Cast<Category>()
+                .FirstOrDefault(category => string.Equals(
+                    category.Name,
+                    subcategoryName,
+                    StringComparison.OrdinalIgnoreCase))
+                ?? _document.Settings.Categories.NewSubcategory(
+                    parentCategory,
+                    subcategoryName);
             _subcategories[subcategoryName] = subcategory;
         }
 
