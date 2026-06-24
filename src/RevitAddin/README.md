@@ -25,8 +25,9 @@ Expected flow:
 4. Add-in creates parameters and materials.
 5. Add-in creates reference planes.
 6. Add-in creates supported native geometry primitives.
-7. Add-in writes a QA report next to the recipe.
-8. User saves the generated `.rfa`.
+7. Add-in saves the generated `.rfa` to a `generated` folder next to the recipe.
+8. Add-in opens/activates the saved `.rfa` in Revit.
+9. Add-in writes a QA report next to the recipe.
 
 Current command state:
 
@@ -37,6 +38,8 @@ Current command state:
 - Can run without an open project because the manifest uses `AlwaysVisible`.
 - Creates a new family document from the installed Revit family template.
 - Builds first-pass native rectangular extrusions from the recipe.
+- Saves the family to `generated\<family name>.rfa` beside the selected recipe.
+- Opens/activates the saved family file in Revit for review.
 - Creates recipe materials, subcategories, and a QA report next to the recipe.
 
 ## MVP Builder
@@ -53,7 +56,7 @@ Current limitations:
 
 - Length parameters are read from the recipe to size the first geometry pass, but Revit family parameters and constraints are not created yet.
 - Only `rectangularExtrusion` geometry is built. Voids, cylinders, formulas, and flexing behavior are still pending.
-- The generated family is left open for review and manual save.
+- The generated family is saved automatically. Existing output files with the same family name are overwritten.
 
 ## Revit API Notes
 

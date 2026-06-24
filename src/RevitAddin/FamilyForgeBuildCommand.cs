@@ -27,7 +27,7 @@ public sealed class FamilyForgeBuildCommand
 
         return BuildFamilyDocument(
             loadResult.Recipe,
-            uiApplication.Application,
+            uiApplication,
             recipePath,
             loadResult.Result);
     }
@@ -94,10 +94,11 @@ public sealed class FamilyForgeBuildCommand
 
     private static FamilyForgeBuildResult BuildFamilyDocument(
         FamilyForgeRecipe recipe,
-        Autodesk.Revit.ApplicationServices.Application application,
+        UIApplication uiApplication,
         string recipePath,
         FamilyForgeBuildResult preflight)
     {
+        var application = uiApplication.Application;
         var templatePath = FamilyForgeTemplateResolver.ResolveTemplatePath(
             recipe,
             application.VersionNumber);
@@ -124,10 +125,11 @@ public sealed class FamilyForgeBuildCommand
             var builder = new FamilyForgeNativeBuilder(familyDocument, recipe);
             builder.Build();
 
-            WriteQaReport(recipePath, recipe, preflight, templatePath, builder.BuiltGeometryCount);
+            var outputPath = ResolveOutputFamilyPath(recipePath, recipe.Family.Name);
+            SaveFamilyDocument(familyDocument, outputPath);
 
             var result = FamilyForgeBuildResult.Success(
-                $"Created family document '{recipe.Family.Name}' from recipe. Built {builder.BuiltGeometryCount} geometry item(s). The family is open in Revit for review and save.");
+                $"Created family '{recipe.Family.Name}' from recipe. Built {builder.BuiltGeometryCount} geometry item(s). Saved to: {outputPath}");
 
             foreach (var warning in preflight.Warnings)
             {
@@ -145,6 +147,16 @@ public sealed class FamilyForgeBuildCommand
                     $"Recipe QA status is '{recipe.Qa.Status}'. Review before client delivery.");
             }
 
+            WriteQaReport(
+                recipePath,
+                recipe,
+                result,
+                templatePath,
+                outputPath,
+                builder.BuiltGeometryCount);
+
+            ActivateSavedFamily(uiApplication, familyDocument, outputPath, result);
+
             return result;
         }
         catch (Exception ex)
@@ -154,11 +166,71 @@ public sealed class FamilyForgeBuildCommand
         }
     }
 
+    private static string ResolveOutputFamilyPath(string recipePath, string familyName)
+    {
+        var recipeDirectory = Path.GetDirectoryName(recipePath)
+            ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        var outputDirectory = Path.Combine(recipeDirectory, "generated");
+        Directory.CreateDirectory(outputDirectory);
+
+        return Path.Combine(outputDirectory, MakeSafeFileName(familyName) + ".rfa");
+    }
+
+    private static void SaveFamilyDocument(Document familyDocument, string outputPath)
+    {
+        var saveOptions = new SaveAsOptions
+        {
+            OverwriteExistingFile = true
+        };
+
+        familyDocument.SaveAs(outputPath, saveOptions);
+    }
+
+    private static void ActivateSavedFamily(
+        UIApplication uiApplication,
+        Document familyDocument,
+        string outputPath,
+        FamilyForgeBuildResult result)
+    {
+        try
+        {
+            familyDocument.Close(false);
+        }
+        catch (Exception ex)
+        {
+            result.AddWarning(
+                $"Saved the family, but Revit did not close the temporary build document before activation: {ex.Message}");
+        }
+
+        try
+        {
+            uiApplication.OpenAndActivateDocument(outputPath);
+            result.AddWarning("Opened the saved family file in Revit for review.");
+        }
+        catch (Exception ex)
+        {
+            result.AddWarning(
+                $"Saved the family, but Revit could not activate it automatically: {ex.Message}");
+        }
+    }
+
+    private static string MakeSafeFileName(string value)
+    {
+        var invalidCharacters = Path.GetInvalidFileNameChars();
+        var safe = new string(value
+            .Select(character => invalidCharacters.Contains(character) ? '_' : character)
+            .ToArray())
+            .Trim();
+
+        return string.IsNullOrWhiteSpace(safe) ? "SymetriFamilyForgeFamily" : safe;
+    }
+
     private static void WriteQaReport(
         string recipePath,
         FamilyForgeRecipe recipe,
         FamilyForgeBuildResult preflight,
         string templatePath,
+        string outputPath,
         int geometryCount)
     {
         var reportPath = Path.ChangeExtension(recipePath, ".family-forge-qa.md");
@@ -169,6 +241,7 @@ public sealed class FamilyForgeBuildCommand
             $"Family: {recipe.Family.Name}",
             $"Schema Version: {recipe.SchemaVersion}",
             $"Template: {templatePath}",
+            $"Output Family: {outputPath}",
             $"Geometry Built: {geometryCount}",
             $"Recipe QA Status: {recipe.Qa.Status}",
             string.Empty,
