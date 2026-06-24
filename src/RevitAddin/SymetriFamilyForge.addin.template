@@ -5,8 +5,8 @@
     <Assembly>{ASSEMBLY_PATH}</Assembly>
     <AddInId>6D80F20C-7C1C-4DB1-9DD8-2B83F7AF3C9D</AddInId>
     <FullClassName>Symetri.FamilyForge.RevitAddin.BuildFamilyFromRecipeCommand</FullClassName>
+    <VisibilityMode>AlwaysVisible</VisibilityMode>
     <VendorId>SYMT</VendorId>
     <VendorDescription>Symetri</VendorDescription>
   </AddIn>
 </RevitAddIns>
-

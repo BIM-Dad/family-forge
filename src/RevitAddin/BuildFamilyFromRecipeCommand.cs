@@ -28,7 +28,9 @@ public sealed class BuildFamilyFromRecipeCommand : IExternalCommand
         }
 
         var buildCommand = new FamilyForgeBuildCommand();
-        var result = buildCommand.BuildFromRecipeFile(dialog.FileName);
+        var result = buildCommand.BuildFromRecipeFile(
+            dialog.FileName,
+            commandData.Application);
 
         var summary = FormatResult(result);
         Autodesk.Revit.UI.TaskDialog.Show("Symetri Family Forge", summary);

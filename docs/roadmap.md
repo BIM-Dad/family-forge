@@ -39,12 +39,14 @@ Deliverables:
 - Revit 2024 build target using .NET Framework 4.8.
 - Revit 2025-2026 build targets using `net8.0-windows`.
 - Revit 2027 build target using `net10.0-windows`.
+- No-open-project command visibility through the Revit add-in manifest.
+- First-pass family document creation from installed Revit templates.
 - Family template mapping.
-- Parameter creation.
-- Reference plane creation.
 - Rectangular extrusion builder.
 - Material creation and assignment.
 - Build QA report.
+- Parameter creation.
+- Reference plane creation.
 
 Success criteria:
 

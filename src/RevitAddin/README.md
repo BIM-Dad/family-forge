@@ -34,18 +34,26 @@ Current command state:
 - Prompts for a recipe JSON file.
 - Runs recipe preflight.
 - Reports warnings and errors in a Revit task dialog.
-- Native geometry creation is the next implementation step.
+- Can run without an open project because the manifest uses `AlwaysVisible`.
+- Creates a new family document from the installed Revit family template.
+- Builds first-pass native rectangular extrusions from the recipe.
+- Creates recipe materials, subcategories, and a QA report next to the recipe.
 
 ## MVP Builder
 
 The first implementation should support:
 
 - Non-hosted Furniture and Generic Models.
-- Length and material parameters.
 - Rectangular extrusions.
 - Simple subcategory assignment.
 - Material assignment.
 - Warning report for unsupported items.
+
+Current limitations:
+
+- Length parameters are read from the recipe to size the first geometry pass, but Revit family parameters and constraints are not created yet.
+- Only `rectangularExtrusion` geometry is built. Voids, cylinders, formulas, and flexing behavior are still pending.
+- The generated family is left open for review and manual save.
 
 ## Revit API Notes
 
