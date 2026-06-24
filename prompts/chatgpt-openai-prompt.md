@@ -14,7 +14,8 @@ The recipe must follow schemaVersion 0.1 and include:
 - materials with name, color, and optional parameterName
 - geometry using only rectangularExtrusion, voidRectangularExtrusion, or cylinder
 - panelized cabinet/casework geometry where possible instead of one large body block
-- cylinder geometry with axis x, y, or z for simple pulls, rods, rails, posts, and round legs
+- cylinder geometry with axis x, y, or z only when the source visibly shows round rods, posts, rails, round legs, or cylindrical hardware
+- rectangularExtrusion geometry for flat bar pulls and squared hardware
 - constraints when useful
 - assumptions
 - clarifyingQuestions

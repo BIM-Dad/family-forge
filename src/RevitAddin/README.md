@@ -48,7 +48,7 @@ The first implementation should support:
 
 - Non-hosted Furniture and Generic Models.
 - Rectangular extrusions.
-- Cylinders along X, Y, or Z axes for simple pulls, rods, and posts.
+- Cylinders along X, Y, or Z axes for visibly round rods, rails, posts, round legs, and cylindrical hardware.
 - Simple subcategory assignment.
 - Material assignment.
 - Warning report for unsupported items.

@@ -16,7 +16,7 @@ Follow these rules:
 - If a dimension is not visible or provided, either use a clearly marked default or add a clarifying question.
 - Prefer simple native Revit primitives: rectangular extrusions, void rectangular extrusions, and cylinders.
 - For cabinets/casework, prefer separate top, bottom, side, back, door, drawer, frame, and trim panels instead of one large body block.
-- Use `cylinder` with `axis` set to `x`, `y`, or `z` for simple pulls, rods, posts, rails, and round legs.
+- Use `cylinder` with `axis` set to `x`, `y`, or `z` only when the source visibly shows round rods, posts, rails, round legs, or cylindrical hardware. Use rectangular extrusions for flat bar pulls and squared hardware.
 - Keep names readable and Revit-safe.
 - Include assumptions and warnings.
 - Use `qa.status = "needs_review"` unless the user has provided all critical dimensions.

@@ -20,7 +20,7 @@ The current builder should generate a native Revit Furniture family with:
 - Left double-door front.
 - Right four-drawer front.
 - Front frame rails and stiles.
-- Simple cylindrical brass-colored pulls.
+- Simple rectangular brass-colored pulls matching the source image.
 - Four simple rectangular leg placeholders.
 
 ## Known Simplifications

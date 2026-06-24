@@ -28,7 +28,7 @@ Allowed geometry types:
 - voidRectangularExtrusion
 - cylinder
 
-For cabinets and casework, prefer separate panels over one large body mass. Use cylinder geometry with axis x, y, or z for simple pulls, rods, rails, posts, and round legs.
+For cabinets and casework, prefer separate panels over one large body mass. Use cylinder geometry with axis x, y, or z only when the source visibly shows round rods, rails, posts, round legs, or cylindrical hardware. Use rectangularExtrusion for flat bar pulls and squared hardware.
 
 Include family metadata, parameters, reference planes, materials, geometry, assumptions, clarifyingQuestions, and qa.
 

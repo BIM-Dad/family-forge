@@ -16,12 +16,13 @@ Rules:
 4. If dimensions are missing, add clarifyingQuestions and warnings.
 5. Use simple primitives first: rectangularExtrusion, voidRectangularExtrusion, cylinder.
 6. For cabinets/casework, prefer separate panels over one large body mass.
-7. Use cylinder axis x, y, or z for pulls, rods, rails, posts, and round legs.
-8. Include Width, Depth, and Height parameters when applicable.
-9. Include named reference planes.
-10. Include materials and subcategories.
-11. Include assumptions and qa warnings.
-12. Set qa.status to "needs_review" unless the source material fully defines the family.
+7. Use cylinder axis x, y, or z only when the source visibly shows round rods, rails, posts, round legs, or cylindrical hardware.
+8. Use rectangularExtrusion for flat bar pulls and squared hardware.
+9. Include Width, Depth, and Height parameters when applicable.
+10. Include named reference planes.
+11. Include materials and subcategories.
+12. Include assumptions and qa warnings.
+13. Set qa.status to "needs_review" unless the source material fully defines the family.
 
 Family request:
 <insert request here>

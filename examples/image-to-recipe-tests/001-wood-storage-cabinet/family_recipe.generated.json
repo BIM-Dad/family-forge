@@ -319,63 +319,58 @@
     },
     {
       "id": "left_vertical_handle",
-      "type": "cylinder",
+      "type": "rectangularExtrusion",
       "name": "Left Door Vertical Handle",
       "subcategory": "Hardware",
-      "axis": "z",
       "material": "Aged Brass",
-      "origin": { "x": 569.8, "y": -47.5, "z": 596 },
-      "dimensions": { "width": 19.6, "depth": 19.6, "height": 181.5 },
+      "origin": { "x": 560, "y": -60, "z": 596 },
+      "dimensions": { "width": 19.6, "depth": 25, "height": 181.5 },
       "visible": true,
-      "notes": "Cylindrical vertical pull."
+      "notes": "Slim rectangular vertical pull matching the source image."
     },
     {
       "id": "drawer_handle_1",
-      "type": "cylinder",
+      "type": "rectangularExtrusion",
       "name": "Top Drawer Handle",
       "subcategory": "Hardware",
-      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -47.5, "z": 955.5 },
-      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
+      "origin": { "x": 760, "y": -60, "z": 948 },
+      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Cylindrical horizontal pull."
+      "notes": "Slim rectangular horizontal pull matching the source image."
     },
     {
       "id": "drawer_handle_2",
-      "type": "cylinder",
+      "type": "rectangularExtrusion",
       "name": "Second Drawer Handle",
       "subcategory": "Hardware",
-      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -47.5, "z": 736.1 },
-      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
+      "origin": { "x": 760, "y": -60, "z": 728.6 },
+      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Cylindrical horizontal pull."
+      "notes": "Slim rectangular horizontal pull matching the source image."
     },
     {
       "id": "drawer_handle_3",
-      "type": "cylinder",
+      "type": "rectangularExtrusion",
       "name": "Third Drawer Handle",
       "subcategory": "Hardware",
-      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -47.5, "z": 516.6 },
-      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
+      "origin": { "x": 760, "y": -60, "z": 509.1 },
+      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Cylindrical horizontal pull."
+      "notes": "Slim rectangular horizontal pull matching the source image."
     },
     {
       "id": "drawer_handle_4",
-      "type": "cylinder",
+      "type": "rectangularExtrusion",
       "name": "Bottom Drawer Handle",
       "subcategory": "Hardware",
-      "axis": "x",
       "material": "Aged Brass",
-      "origin": { "x": 760, "y": -47.5, "z": 297.2 },
-      "dimensions": { "width": 151.1, "depth": 15, "height": 15 },
+      "origin": { "x": 760, "y": -60, "z": 289.7 },
+      "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
-      "notes": "Cylindrical horizontal pull."
+      "notes": "Slim rectangular horizontal pull matching the source image."
     },
     {
       "id": "front_left_leg",
@@ -442,7 +437,7 @@
   "assumptions": [
     "Overall product dimensions were provided as 42 in wide, 18 in deep, and 45 in high, then converted to millimeters.",
     "Leg height, body height, frame thickness, door split, and front component locations are inferred from the image.",
-    "Wood grain, bevels, drawer gaps, and angled/tapered legs are simplified; the body is now panelized and handles use cylinders.",
+    "Wood grain, bevels, drawer gaps, and angled/tapered legs are simplified; the body is now panelized and handles remain rectangular to match the source image.",
     "The builder does not yet create flexing Revit parameters or constraints from the recipe."
   ],
   "clarifyingQuestions": [
