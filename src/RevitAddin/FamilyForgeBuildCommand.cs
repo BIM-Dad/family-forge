@@ -242,7 +242,7 @@ public sealed class FamilyForgeBuildCommand
         var reportPath = Path.ChangeExtension(recipePath, ".family-forge-qa.md");
         var lines = new List<string>
         {
-            "# Symetri Family Forge QA Report",
+            "# Symetri Family Forge Technical QA/QC Report",
             string.Empty,
             $"Family: {recipe.Family.Name}",
             $"Schema Version: {recipe.SchemaVersion}",
@@ -315,13 +315,13 @@ public sealed class FamilyForgeBuildCommand
 
         var lines = new List<string>
         {
-            "# Symetri Family Forge Recipe Feedback",
+            "# Symetri Family Forge Interim Recipe Feedback",
             string.Empty,
             $"Family: {recipe.Family.Name}",
             $"Recipe QA Status: {recipe.Qa.Status}",
             string.Empty,
             "## Use This To Revise The AI Prompt Or JSON",
-            "Copy the relevant items below into the next AI connector prompt, then regenerate or edit the recipe before rebuilding.",
+            "This is an interim preflight artifact. Long term, these items should be resolved in the browser recipe viewer before Revit creates an RFA.",
             string.Empty,
             "## Questions To Answer"
         };

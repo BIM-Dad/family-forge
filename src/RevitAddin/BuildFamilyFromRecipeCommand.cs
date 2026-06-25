@@ -69,7 +69,7 @@ public sealed class BuildFamilyFromRecipeCommand : IExternalCommand
 
         if (!string.IsNullOrWhiteSpace(result.FeedbackReportPath))
         {
-            lines.Add("Recipe Feedback Report:");
+            lines.Add("Interim Recipe Feedback Report:");
             lines.Add(result.FeedbackReportPath);
             lines.Add(string.Empty);
         }

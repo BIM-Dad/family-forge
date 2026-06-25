@@ -117,6 +117,26 @@ Success criteria:
 - Human correction points are clear and repeatable.
 - Output quality is acceptable for internal draft use.
 
+## Phase 3.5: Recipe Viewer And Preflight Review
+
+Goal: validate model intent before Revit creates a family.
+
+Deliverables:
+
+- Browser recipe viewer for `family_recipe.json`.
+- Three-dimensional preview of supported primitives.
+- Parameter sliders/inputs for recipe parameters.
+- Open-question panel from `clarifyingQuestions`.
+- Recipe feedback report for AI prompt and JSON improvement.
+- Builder-gap panel that separates unsupported builder features from recipe problems.
+- Export of revised JSON for the Revit add-in.
+
+Success criteria:
+
+- A BIM specialist can resolve open questions before launching Revit.
+- Prompt-improvement notes are captured before `.rfa` generation.
+- Revit-side reports become technical QA/QC reports, not the primary design-intent review surface.
+
 ## Phase 4: Client-Facing Evaluation
 
 Goal: decide whether to expose the workflow as a client-facing toolkit.
@@ -125,6 +145,7 @@ Deliverables:
 
 - Browser recipe review UI.
 - Preview workflow.
+- Open-question and recipe-feedback workflow.
 - Upload and prompt flow.
 - Guardrails and disclaimers.
 - Support model.

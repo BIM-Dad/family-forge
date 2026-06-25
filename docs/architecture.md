@@ -14,14 +14,14 @@
 flowchart TD
     A["Source Material"] --> B["AI Connector Prompt Pack"]
     B --> C["family_recipe.json"]
-    C --> D["Schema Validation"]
-    D --> E["BIM QA Rules"]
-    E --> F{"Approved?"}
-    F -->|"No"| G["Clarifying Questions / Recipe Edits"]
+    C --> D["Browser Recipe Viewer"]
+    D --> E["Schema + BIM Intent Validation"]
+    E --> F{"Recipe Approved?"}
+    F -->|"No"| G["Open Questions / Prompt + Recipe Edits"]
     G --> C
     F -->|"Yes"| H["Revit Builder Add-in"]
     H --> I["Native Revit Family"]
-    H --> J["QA Report"]
+    H --> J["Technical QA/QC Report"]
 ```
 
 ## Components
@@ -67,6 +67,19 @@ Early validation examples:
 - Materials referenced by geometry exist.
 - Hosted behavior is supported by the selected template.
 
+### Browser Recipe Viewer
+
+The browser viewer is the preferred place to validate model intent before creating a Revit family. It should preview the JSON geometry, expose editable parameters, show open questions, and separate recipe/model issues from Revit builder limitations.
+
+The viewer should produce a recipe feedback report that answers:
+
+- What questions must be resolved before build.
+- Which dimensions, proportions, materials, or hosting assumptions were inferred.
+- Which prompt instructions should be added before regenerating JSON.
+- Which geometry is intentionally approximate because the builder does not support the ideal Revit primitive yet.
+
+This prevents the Revit add-in from becoming the primary place for design-intent review. Once the viewer exists, Revit-side reporting should focus on technical QA/QC of the generated family.
+
 ### Revit Builder
 
 The Revit builder consumes an approved recipe and creates native family content. The initial builder should prioritize a small, reliable set of primitives:
@@ -90,17 +103,20 @@ Future builder work should align with [Revit Family Best Practices](revit-family
 - Reporting any geometry that remains unassociated.
 - Preserving ideal modeling intent when the current builder must use an approximation.
 
-### QA Report
+### Technical QA/QC Report
 
-Each build should produce a report listing:
+Each Revit build should produce a technical report listing:
 
 - Recipe schema version.
-- Source assumptions.
 - Generated parameters.
+- Generated reference planes.
 - Generated geometry count.
-- Unsupported or skipped instructions.
-- Warnings requiring human review.
-- Pass/fail status for delivery.
+- Unsupported or skipped builder instructions.
+- Geometry that remains unassociated or simplified.
+- Revit API limitations encountered during build.
+- Pass/fail status for Revit delivery QA/QC.
+
+Open questions and prompt-improvement notes belong in the browser viewer recipe feedback report. The current add-in may still write an interim feedback report until the viewer owns that workflow.
 
 ## MVP Scope
 
@@ -132,9 +148,9 @@ The fastest path to value is internal service acceleration:
 
 1. Symetri receives source material from a client.
 2. A consultant uses an AI connector to generate a recipe.
-3. The validator flags gaps.
-4. A BIM specialist answers or corrects the recipe.
+3. The browser viewer validates geometry, parameters, assumptions, and open questions.
+4. A BIM specialist answers or corrects the recipe before Revit build.
 5. The builder creates the draft family.
-6. The specialist flexes, reviews, and delivers the family with a QA report.
+6. The specialist flexes, reviews, and delivers the family with a technical QA/QC report.
 
 This creates learning data before a self-service client product is exposed.
