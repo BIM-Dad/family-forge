@@ -1,10 +1,10 @@
-# Opportunity Brief: Symetri Family Forge
+﻿# Opportunity Brief: Symetri Family Forge
 
 Status: Candidate
 Owner: Gerardo Ruiz-King
 Date Created: 2026-06-24
 Last Updated: 2026-06-24
-Artifact Library Reference: `P:\_IRIS-Artifact Library\06_Prototype_Tools\Symetri_Family_Forge`
+Artifact Library Reference: `P:\_IRIS-Artifact Library\00_Opportunities\Symetri_Family_Forge\repos\symetri-family-forge`
 Opportunity Category: Internal Service Accelerator / Client-Facing Toolkit Candidate
 Internal Priority: High
 
@@ -95,7 +95,7 @@ Initial references include screenshots and notes from image-to-model and AI-to-R
 Planned operational home:
 
 ```text
-P:\_IRIS-Artifact Library\06_Prototype_Tools\Symetri_Family_Forge
+P:\_IRIS-Artifact Library\00_Opportunities\Symetri_Family_Forge\repos\symetri-family-forge
 ```
 
 ## Risks and Constraints
@@ -134,3 +134,4 @@ Build the MVP around a wardrobe/cabinet/table class:
 - Build a local recipe validator.
 - Build a Revit add-in command that reads a validated recipe and creates first-pass native geometry.
 - Run three sample family pilots and document the QA gaps.
+
