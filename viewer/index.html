@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Symetri Family Forge Recipe Viewer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101214;
+      --panel: #181b1f;
+      --panel-2: #20242a;
+      --line: #303741;
+      --text: #f3f5f7;
+      --muted: #aab3bd;
+      --accent: #74b8ff;
+      --warn: #ffcc66;
+      --bad: #ff7b7b;
+      --good: #88d498;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #0d0f12;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button, .file-label {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    button:hover, .file-label:hover { border-color: var(--accent); }
+    input[type="file"] { display: none; }
+
+    main {
+      display: grid;
+      grid-template-columns: 320px minmax(400px, 1fr) 360px;
+      min-height: calc(100vh - 61px);
+    }
+
+    aside, section {
+      min-width: 0;
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    aside:last-child { border-right: 0; }
+
+    .pane {
+      padding: 14px;
+      overflow: auto;
+      max-height: calc(100vh - 61px);
+    }
+
+    .viewer {
+      display: grid;
+      grid-template-rows: minmax(360px, 1fr) 220px;
+      background: #0b0d10;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(transparent 31px, rgba(255,255,255,0.035) 32px),
+        linear-gradient(90deg, transparent 31px, rgba(255,255,255,0.035) 32px),
+        #0b0d10;
+      background-size: 32px 32px;
+    }
+
+    .json-box {
+      border-top: 1px solid var(--line);
+      background: #0d0f12;
+      padding: 12px;
+      overflow: auto;
+      white-space: pre;
+      font: 12px Consolas, "Courier New", monospace;
+      color: #d7dde5;
+    }
+
+    h2 {
+      margin: 4px 0 10px;
+      font-size: 13px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .summary {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel-2);
+    }
+
+    .metric span:last-child { color: var(--muted); text-align: right; }
+
+    .list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 10px;
+      background: var(--panel-2);
+    }
+
+    .item strong { display: block; margin-bottom: 4px; }
+    .item small { color: var(--muted); line-height: 1.35; }
+
+    .warn { border-color: rgba(255, 204, 102, .55); }
+    .bad { border-color: rgba(255, 123, 123, .65); }
+    .good { border-color: rgba(136, 212, 152, .55); }
+
+    .param {
+      display: grid;
+      gap: 6px;
+    }
+
+    .param-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 10px;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+    }
+
+    @media (max-width: 1100px) {
+      main { grid-template-columns: 1fr; }
+      .pane { max-height: none; }
+      aside, section { border-right: 0; border-bottom: 1px solid var(--line); }
+      .viewer { min-height: 620px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Symetri Family Forge Recipe Viewer</h1>
+    <div class="actions">
+      <label class="file-label" for="recipeFile">Open Recipe JSON</label>
+      <input id="recipeFile" type="file" accept=".json,application/json">
+      <button id="loadSample" type="button">Load Cabinet Sample</button>
+      <button id="copyFeedback" type="button">Copy Feedback</button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="pane">
+      <h2>Recipe</h2>
+      <div id="summary" class="summary"></div>
+      <h2>Parameters</h2>
+      <div id="parameters" class="list"></div>
+      <h2>Elements</h2>
+      <div id="elements" class="list"></div>
+    </aside>
+
+    <section class="viewer">
+      <canvas id="preview" width="1200" height="760"></canvas>
+      <pre id="jsonBox" class="json-box">Open a Family Forge recipe to preview it before creating a Revit family.</pre>
+    </section>
+
+    <aside class="pane">
+      <h2>Open Questions</h2>
+      <div id="questions" class="list"></div>
+      <h2>Builder Gaps</h2>
+      <div id="gaps" class="list"></div>
+      <h2>Preflight Feedback</h2>
+      <div id="feedback" class="list"></div>
+    </aside>
+  </main>
+
+  <script>
+    const state = {
+      recipe: null,
+      params: new Map(),
+      colors: new Map()
+    };
+
+    const supportedTools = new Set(["extrusion", "voidExtrusion", "cylinder"]);
+    const supportedTypes = new Set(["rectangularExtrusion", "voidRectangularExtrusion", "cylinder"]);
+
+    const els = {
+      file: document.getElementById("recipeFile"),
+      loadSample: document.getElementById("loadSample"),
+      copyFeedback: document.getElementById("copyFeedback"),
+      canvas: document.getElementById("preview"),
+      jsonBox: document.getElementById("jsonBox"),
+      summary: document.getElementById("summary"),
+      parameters: document.getElementById("parameters"),
+      elements: document.getElementById("elements"),
+      questions: document.getElementById("questions"),
+      gaps: document.getElementById("gaps"),
+      feedback: document.getElementById("feedback")
+    };
+
+    els.file.addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      loadRecipe(JSON.parse(text));
+    });
+
+    els.loadSample.addEventListener("click", async () => {
+      const response = await fetch("../examples/image-to-recipe-tests/001-wood-storage-cabinet/family_recipe.generated.json");
+      if (!response.ok) {
+        alert("Sample load needs a local web server. Use Open Recipe JSON instead, or run a simple static server from the repo.");
+        return;
+      }
+      loadRecipe(await response.json());
+    });
+
+    els.copyFeedback.addEventListener("click", async () => {
+      const text = buildFeedbackText(state.recipe);
+      await navigator.clipboard.writeText(text);
+      els.copyFeedback.textContent = "Copied";
+      setTimeout(() => els.copyFeedback.textContent = "Copy Feedback", 1200);
+    });
+
+    function loadRecipe(recipe) {
+      state.recipe = recipe;
+      state.params = new Map((recipe.parameters || []).map(param => [param.name, Number(param.value) || 0]));
+      state.colors = new Map((recipe.materials || []).map(material => [material.name, material.color || "#888888"]));
+      els.jsonBox.textContent = JSON.stringify(recipe, null, 2);
+      render();
+    }
+
+    function render() {
+      const recipe = state.recipe;
+      if (!recipe) return;
+      renderSummary(recipe);
+      renderParameters(recipe);
+      renderElements(recipe);
+      renderQuestions(recipe);
+      renderGaps(recipe);
+      renderFeedback(recipe);
+      drawPreview(recipe);
+    }
+
+    function renderSummary(recipe) {
+      const geometry = recipe.geometry || [];
+      const warnings = collectWarnings(recipe);
+      els.summary.innerHTML = "";
+      addMetric(els.summary, "Family", recipe.family?.name || "Unnamed");
+      addMetric(els.summary, "Category", recipe.family?.category || "Unknown");
+      addMetric(els.summary, "Hosting", recipe.family?.hosting || "Unknown");
+      addMetric(els.summary, "Geometry", geometry.length);
+      addMetric(els.summary, "Open Questions", (recipe.clarifyingQuestions || []).length);
+      addMetric(els.summary, "Preflight Warnings", warnings.length);
+    }
+
+    function addMetric(parent, label, value) {
+      const node = document.createElement("div");
+      node.className = "metric";
+      node.innerHTML = `<span>${escapeHtml(label)}</span><span>${escapeHtml(String(value))}</span>`;
+      parent.appendChild(node);
+    }
+
+    function renderParameters(recipe) {
+      els.parameters.innerHTML = "";
+      const params = recipe.parameters || [];
+      if (!params.length) return empty(els.parameters, "No parameters found.");
+      for (const param of params) {
+        const node = document.createElement("div");
+        node.className = "item param";
+        const value = state.params.get(param.name) ?? Number(param.value) ?? 0;
+        const isLength = param.dataType === "length";
+        node.innerHTML = `
+          <div class="param-row"><strong>${escapeHtml(param.name)}</strong><small>${escapeHtml(String(value))} ${isLength ? recipe.family?.units || "" : ""}</small></div>
+          <small>${escapeHtml(param.group || "")} | ${escapeHtml(param.source || "unknown")}</small>
+          ${isLength ? `<input type="range" min="${Math.max(0, value * 0.35)}" max="${Math.max(value * 1.8, value + 1)}" step="1" value="${value}">` : ""}
+        `;
+        const slider = node.querySelector("input");
+        if (slider) {
+          slider.addEventListener("input", event => {
+            state.params.set(param.name, Number(event.target.value));
+            render();
+          });
+        }
+        els.parameters.appendChild(node);
+      }
+    }
+
+    function renderElements(recipe) {
+      els.elements.innerHTML = "";
+      const geometry = recipe.geometry || [];
+      if (!geometry.length) return empty(els.elements, "No geometry found.");
+      for (const item of geometry) {
+        const ideal = item.idealRevitTool || inferIdealTool(item);
+        const className = ideal && !supportedTools.has(ideal) ? "item warn" : "item";
+        const node = document.createElement("div");
+        node.className = className;
+        node.innerHTML = `
+          <strong>${escapeHtml(item.name || item.id)}</strong>
+          <small>${escapeHtml(item.type)} | ${escapeHtml(item.subcategory || "No subcategory")}</small><br>
+          <small>Ideal: ${escapeHtml(ideal || "not stated")}</small>
+        `;
+        els.elements.appendChild(node);
+      }
+    }
+
+    function renderQuestions(recipe) {
+      els.questions.innerHTML = "";
+      const questions = recipe.clarifyingQuestions || [];
+      if (!questions.length) return empty(els.questions, "No open questions.");
+      for (const question of questions) {
+        const node = document.createElement("div");
+        node.className = "item warn";
+        node.innerHTML = `<small>${escapeHtml(question)}</small>`;
+        els.questions.appendChild(node);
+      }
+    }
+
+    function renderGaps(recipe) {
+      els.gaps.innerHTML = "";
+      const gaps = collectBuilderGaps(recipe);
+      if (!gaps.length) return empty(els.gaps, "No builder gaps detected.");
+      for (const gap of gaps) {
+        const node = document.createElement("div");
+        node.className = "item warn";
+        node.innerHTML = `<strong>${escapeHtml(gap.title)}</strong><small>${escapeHtml(gap.detail)}</small>`;
+        els.gaps.appendChild(node);
+      }
+    }
+
+    function renderFeedback(recipe) {
+      els.feedback.innerHTML = "";
+      const feedback = buildFeedbackItems(recipe);
+      if (!feedback.length) return empty(els.feedback, "No feedback items.");
+      for (const item of feedback) {
+        const node = document.createElement("div");
+        node.className = item.kind === "bad" ? "item bad" : "item warn";
+        node.innerHTML = `<strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.detail)}</small>`;
+        els.feedback.appendChild(node);
+      }
+    }
+
+    function drawPreview(recipe) {
+      const canvas = els.canvas;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(800, Math.floor(rect.width * devicePixelRatio));
+      canvas.height = Math.max(500, Math.floor(rect.height * devicePixelRatio));
+      const ctx = canvas.getContext("2d");
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+
+      const geometry = recipe.geometry || [];
+      if (!geometry.length) return;
+      const units = recipe.family?.units || "mm";
+      const bounds = getBounds(recipe);
+      const scale = Math.min(rect.width / Math.max(bounds.width + bounds.depth, 1), rect.height / Math.max(bounds.height + bounds.depth, 1)) * 0.72;
+      const origin = { x: rect.width * 0.5, y: rect.height * 0.72 };
+
+      drawAxes(ctx, origin, scale, bounds);
+      for (const item of geometry) {
+        if (item.visible === false) continue;
+        drawBox(ctx, item, origin, scale, units);
+      }
+    }
+
+    function drawAxes(ctx, origin, scale, bounds) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(116,184,255,.5)";
+      ctx.lineWidth = 1;
+      line(ctx, project(-bounds.width / 2, 0, 0, origin, scale), project(bounds.width / 2, 0, 0, origin, scale));
+      line(ctx, project(0, -bounds.depth / 2, 0, origin, scale), project(0, bounds.depth / 2, 0, origin, scale));
+      line(ctx, project(0, 0, 0, origin, scale), project(0, 0, bounds.height, origin, scale));
+      ctx.restore();
+    }
+
+    function drawBox(ctx, item, origin, scale, units) {
+      const p = resolvePoint(item.origin || {}, units);
+      const d = item.dimensions || {};
+      const width = resolveValue(d.width, units);
+      const depth = resolveValue(d.depth, units);
+      const height = resolveValue(d.height, units);
+      const color = state.colors.get(item.material) || "#777777";
+      const points = [
+        [p.x, p.y, p.z], [p.x + width, p.y, p.z], [p.x + width, p.y + depth, p.z], [p.x, p.y + depth, p.z],
+        [p.x, p.y, p.z + height], [p.x + width, p.y, p.z + height], [p.x + width, p.y + depth, p.z + height], [p.x, p.y + depth, p.z + height]
+      ].map(point => project(centerX(point[0]), centerY(point[1]), point[2], origin, scale));
+      const faces = [[0,1,2,3], [4,5,6,7], [0,1,5,4], [1,2,6,5], [2,3,7,6], [3,0,4,7]];
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,0,0,.8)";
+      ctx.lineWidth = 1;
+      for (const face of faces) {
+        ctx.beginPath();
+        ctx.moveTo(points[face[0]].x, points[face[0]].y);
+        for (const index of face.slice(1)) ctx.lineTo(points[index].x, points[index].y);
+        ctx.closePath();
+        ctx.fillStyle = withAlpha(color, 0.72);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function project(x, y, z, origin, scale) {
+      return {
+        x: origin.x + (x - y) * 0.55 * scale,
+        y: origin.y + (x + y) * 0.28 * scale - z * 0.9 * scale
+      };
+    }
+
+    function line(ctx, a, b) {
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+
+    function getBounds(recipe) {
+      return {
+        width: resolveParam("Width", 1000, recipe.family?.units || "mm"),
+        depth: resolveParam("Depth", 500, recipe.family?.units || "mm"),
+        height: resolveParam("Height", 1000, recipe.family?.units || "mm")
+      };
+    }
+
+    function centerX(value) {
+      return value - resolveParam("Width", 1000, state.recipe?.family?.units || "mm") / 2;
+    }
+
+    function centerY(value) {
+      return value - resolveParam("Depth", 500, state.recipe?.family?.units || "mm") / 2;
+    }
+
+    function resolvePoint(point, units) {
+      return {
+        x: resolveValue(point.x, units),
+        y: resolveValue(point.y, units),
+        z: resolveValue(point.z, units)
+      };
+    }
+
+    function resolveValue(value, units) {
+      if (typeof value === "number") return units === "in" ? value * 25.4 : value;
+      if (typeof value === "string") return resolveParam(value, 0, units);
+      return 0;
+    }
+
+    function resolveParam(name, fallback, units) {
+      const value = state.params.get(name);
+      if (Number.isFinite(value)) return units === "in" ? value * 25.4 : value;
+      return fallback;
+    }
+
+    function collectWarnings(recipe) {
+      return [
+        ...((recipe.qa && recipe.qa.warnings) || []),
+        ...collectBuilderGaps(recipe).map(gap => gap.detail),
+        ...((recipe.clarifyingQuestions || []).map(question => `Open question: ${question}`))
+      ];
+    }
+
+    function collectBuilderGaps(recipe) {
+      const gaps = [];
+      for (const item of recipe.geometry || []) {
+        if (!supportedTypes.has(item.type)) {
+          gaps.push({ title: item.name || item.id, detail: `Unsupported buildable geometry type: ${item.type}` });
+        }
+        const ideal = item.idealRevitTool || inferIdealTool(item);
+        if (ideal && !supportedTools.has(ideal)) {
+          gaps.push({
+            title: item.name || item.id,
+            detail: `Ideal Revit tool is ${ideal}; current builder will use ${item.type}. ${item.approximationReason || ""}`.trim()
+          });
+        }
+      }
+      for (const nested of recipe.nestedFamilies || []) {
+        if (nested.status === "recommended" || nested.status === "required") {
+          gaps.push({ title: nested.name, detail: `Nested family ${nested.status}: ${nested.purpose}` });
+        }
+      }
+      return gaps;
+    }
+
+    function buildFeedbackItems(recipe) {
+      const items = [];
+      for (const question of recipe.clarifyingQuestions || []) {
+        items.push({ kind: "warn", title: "Question to answer", detail: question });
+      }
+      for (const param of recipe.parameters || []) {
+        if (param.source === "inferred" || param.source === "defaulted") {
+          items.push({ kind: "warn", title: `Review ${param.name}`, detail: `Value is ${param.source}: ${param.value}` });
+        }
+      }
+      for (const gap of collectBuilderGaps(recipe)) {
+        items.push({ kind: "warn", title: `Builder gap: ${gap.title}`, detail: gap.detail });
+      }
+      return items;
+    }
+
+    function buildFeedbackText(recipe) {
+      if (!recipe) return "";
+      const lines = [
+        `Symetri Family Forge recipe feedback for ${recipe.family?.name || "unnamed family"}`,
+        "",
+        "Questions to answer:"
+      ];
+      const questions = recipe.clarifyingQuestions || [];
+      lines.push(...(questions.length ? questions.map(item => `- ${item}`) : ["- None"]));
+      lines.push("", "Suggested JSON/prompt revisions:");
+      const feedback = buildFeedbackItems(recipe);
+      lines.push(...(feedback.length ? feedback.map(item => `- ${item.title}: ${item.detail}`) : ["- None"]));
+      return lines.join("\n");
+    }
+
+    function inferIdealTool(item) {
+      const text = `${item.intent || ""} ${item.notes || ""}`.toLowerCase();
+      if (text.includes("swept blend")) return "sweptBlend";
+      if (text.includes("sweep")) return "sweep";
+      if (text.includes("blend") || text.includes("taper")) return "blend";
+      if (text.includes("nested")) return "nestedFamily";
+      if (text.includes("reveal")) return "reveal";
+      if (item.type === "cylinder") return "cylinder";
+      if (item.type === "voidRectangularExtrusion") return "voidExtrusion";
+      return "extrusion";
+    }
+
+    function withAlpha(hex, alpha) {
+      const value = hex.replace("#", "");
+      const r = parseInt(value.substring(0, 2), 16) || 128;
+      const g = parseInt(value.substring(2, 4), 16) || 128;
+      const b = parseInt(value.substring(4, 6), 16) || 128;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function empty(parent, message) {
+      const node = document.createElement("div");
+      node.className = "empty";
+      node.textContent = message;
+      parent.appendChild(node);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>

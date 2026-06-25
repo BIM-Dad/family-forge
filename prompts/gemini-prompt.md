@@ -30,6 +30,8 @@ Allowed geometry types:
 - voidRectangularExtrusion
 - cylinder
 
+Geometry type must stay buildable. Add idealRevitTool when the correct Revit authoring method should be extrusion, voidExtrusion, cylinder, blend, sweep, sweptBlend, revolve, nestedFamily, array, or reveal. Include approximationReason whenever idealRevitTool is more advanced than the current buildable primitive.
+
 For cabinets and casework, prefer separate panels over one large body mass. Use cylinder geometry with axis x, y, or z only when the source visibly shows round rods, rails, posts, round legs, or cylindrical hardware. Use rectangularExtrusion for flat bar pulls and squared hardware.
 
 In geometry intent and notes, describe the ideal BIM modeling strategy when the v0.1 geometry is only an approximation. Call out elements that should later become blends, sweeps, swept blends, reveals, recessed panels, or nested hardware families. Include reference planes and named parameters for bounds, centerlines, reveals, hardware positions, face frames, dividers, shelves, and leg centers where applicable.

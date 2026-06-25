@@ -355,6 +355,24 @@
         "material": {
           "type": "string"
         },
+        "idealRevitTool": {
+          "type": "string",
+          "enum": [
+            "extrusion",
+            "voidExtrusion",
+            "cylinder",
+            "blend",
+            "sweep",
+            "sweptBlend",
+            "revolve",
+            "nestedFamily",
+            "array",
+            "reveal"
+          ]
+        },
+        "approximationReason": {
+          "type": "string"
+        },
         "origin": {
           "$ref": "#/$defs/point3"
         },

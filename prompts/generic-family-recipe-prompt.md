@@ -20,6 +20,8 @@ Follow these rules:
 - For cabinets/casework, prefer separate top, bottom, side, back, door, drawer, frame, and trim panels instead of one large body block.
 - Use `cylinder` with `axis` set to `x`, `y`, or `z` only when the source visibly shows round rods, posts, rails, round legs, or cylindrical hardware. Use rectangular extrusions for flat bar pulls and squared hardware.
 - Include BIM modeling intent in `intent` and supporting `notes`: call out when an element should ideally be a Revit blend, sweep, swept blend, reveal, nested hardware family, or parametric face-frame condition even if the v0.1 buildable geometry must be simplified.
+- Keep geometry `type` limited to the current buildable primitive, but add `idealRevitTool` when a better Revit modeling tool should eventually be used. Use one of: `extrusion`, `voidExtrusion`, `cylinder`, `blend`, `sweep`, `sweptBlend`, `revolve`, `nestedFamily`, `array`, `reveal`.
+- If `idealRevitTool` is more advanced than the current buildable primitive, include `approximationReason` explaining why the primitive is only a temporary representation.
 - Prefer reference-plane-driven and parameter-driven descriptions. Avoid arbitrary unassociated geometry when a controlling plane or parameter can be named.
 - Identify parts that should be nested families, especially handles, pulls, legs, hinges, repeated hardware, and reusable modules.
 - Include explicit strategy sections: `familyStrategy`, `referencePlaneStrategy`, `parameterStrategy`, `nestedFamilies`, `visibilityStrategy`, and `publishingQa`.
@@ -58,6 +60,7 @@ Required output:
 - Include additional reference planes for centerlines, reveals, hardware positions, face frames, recessed panels, dividers, shelves, and leg centers when visible.
 - Include materials even if defaulted.
 - Include geometry primitives.
+- Include `idealRevitTool` and `approximationReason` on geometry whenever the correct Revit authoring method is more advanced than the current buildable primitive.
 - Include `familyStrategy` explaining template/category/hosting/reusability, LOD target, scheduling intent, and rendering intent.
 - Include `referencePlaneStrategy` listing controlling planes for extents, panel faces, dividers, reveals, hardware, legs, and repeated modules.
 - Include `parameterStrategy` listing user-facing parameters and what geometry should associate to them.

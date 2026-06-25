@@ -124,6 +124,7 @@ Goal: validate model intent before Revit creates a family.
 Deliverables:
 
 - Browser recipe viewer for `family_recipe.json`.
+- Initial local dependency-free viewer in `viewer/index.html`.
 - Three-dimensional preview of supported primitives.
 - Parameter sliders/inputs for recipe parameters.
 - Open-question panel from `clarifyingQuestions`.

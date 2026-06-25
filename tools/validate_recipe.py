@@ -96,6 +96,7 @@ def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
 
     materials = recipe.get("materials", [])
     material_names = {item.get("name") for item in materials if isinstance(item, dict)}
+    builder_supported_tools = {"extrusion", "voidExtrusion", "cylinder"}
 
     for geometry in recipe.get("geometry", []):
         if not isinstance(geometry, dict):
@@ -105,10 +106,19 @@ def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
         geometry_type = geometry.get("type")
         axis = geometry.get("axis", "z")
         intent = geometry.get("intent")
+        ideal_tool = geometry.get("idealRevitTool")
         if material_name not in material_names:
             warnings.append(
                 f"Geometry '{geometry_id}' references unknown material '{material_name}'."
             )
+        if ideal_tool and ideal_tool not in builder_supported_tools:
+            warnings.append(
+                f"Geometry '{geometry_id}' ideally wants Revit tool '{ideal_tool}', which is not implemented by the current builder."
+            )
+            if not geometry.get("approximationReason"):
+                warnings.append(
+                    f"Geometry '{geometry_id}' should explain why its current buildable primitive is an approximation."
+                )
         if intent and isinstance(intent, str):
             lowered_intent = intent.lower()
             if any(term in lowered_intent for term in ["blend", "sweep", "reveal", "nested"]):

@@ -47,7 +47,7 @@ AI-assisted experiments can accelerate interpretation, but the handoff into Revi
 Use a three-part pipeline:
 
 1. AI connector creates a family recipe from images, PDFs, sketches, or prompts.
-2. Symetri Family Forge validates and previews the recipe.
+2. Symetri Family Forge validates and previews the recipe in a browser preflight viewer.
 3. A Revit add-in builds the native family from the approved recipe.
 
 The AI output remains editable JSON. Every step is inspectable.
@@ -56,11 +56,13 @@ The AI output remains editable JSON. Every step is inspectable.
 flowchart LR
     A["Image, PDF, sketch, or prompt"] --> B["Any AI connector"]
     B --> C["Family Recipe JSON"]
-    C --> D["Recipe Validator"]
-    D --> E["Preview / QA Summary"]
-    D --> F["Revit Family Builder"]
-    F --> G["Native .RFA"]
-    G --> H["QA Report"]
+    C --> D["Recipe Viewer / Preflight"]
+    D --> E["Open Questions + Builder Gaps"]
+    E --> C
+    D --> F["Approved Recipe"]
+    F --> G["Revit Family Builder"]
+    G --> H["Native .RFA"]
+    H --> I["Technical QA/QC Report"]
 ```
 
 ## Product Shape
@@ -132,4 +134,3 @@ Build the MVP around a wardrobe/cabinet/table class:
 - Build a local recipe validator.
 - Build a Revit add-in command that reads a validated recipe and creates first-pass native geometry.
 - Run three sample family pilots and document the QA gaps.
-

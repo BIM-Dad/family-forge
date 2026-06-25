@@ -378,7 +378,9 @@
       "dimensions": { "width": "Width", "depth": 35, "height": 49.7 },
       "visible": true,
       "notes": "Approximates thick top front frame.",
-      "intent": "Front frame should eventually be a sweep with a profiled bevel sloping toward the cabinet center."
+      "intent": "Front frame should eventually be a sweep with a profiled bevel sloping toward the cabinet center.",
+      "idealRevitTool": "sweep",
+      "approximationReason": "Current builder approximates the profiled front rail as a rectangular extrusion until sweep/profile support exists."
     },
     {
       "id": "bottom_front_rail",
@@ -390,7 +392,9 @@
       "dimensions": { "width": "Width", "depth": 35, "height": 49.7 },
       "visible": true,
       "notes": "Approximates lower front rail above legs.",
-      "intent": "Front frame should eventually be a sweep with a profiled bevel sloping toward the cabinet center."
+      "intent": "Front frame should eventually be a sweep with a profiled bevel sloping toward the cabinet center.",
+      "idealRevitTool": "sweep",
+      "approximationReason": "Current builder approximates the profiled front rail as a rectangular extrusion until sweep/profile support exists."
     },
     {
       "id": "left_front_stile",
@@ -402,7 +406,9 @@
       "dimensions": { "width": 48.9, "depth": 35, "height": "Body Height" },
       "visible": true,
       "notes": "Left vertical frame.",
-      "intent": "Face frame stile should eventually be a sweep/profile condition rather than a plain rectangular extrusion."
+      "intent": "Face frame stile should eventually be a sweep/profile condition rather than a plain rectangular extrusion.",
+      "idealRevitTool": "sweep",
+      "approximationReason": "Current builder approximates the profiled stile as a rectangular extrusion until sweep/profile support exists."
     },
     {
       "id": "middle_front_stile",
@@ -426,7 +432,9 @@
       "dimensions": { "width": 53.3, "depth": 35, "height": "Body Height" },
       "visible": true,
       "notes": "Right vertical frame.",
-      "intent": "Face frame stile should eventually be a sweep/profile condition rather than a plain rectangular extrusion."
+      "intent": "Face frame stile should eventually be a sweep/profile condition rather than a plain rectangular extrusion.",
+      "idealRevitTool": "sweep",
+      "approximationReason": "Current builder approximates the profiled stile as a rectangular extrusion until sweep/profile support exists."
     },
     {
       "id": "left_vertical_handle",
@@ -438,7 +446,9 @@
       "dimensions": { "width": 19.6, "depth": 25, "height": 181.5 },
       "visible": true,
       "notes": "Slim vertical pull matching the source image.",
-      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the door face."
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the door face.",
+      "idealRevitTool": "nestedFamily",
+      "approximationReason": "Current builder approximates pull hardware as rectangular extrusion geometry until nested sweep hardware is supported."
     },
     {
       "id": "drawer_handle_1",
@@ -450,7 +460,9 @@
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
       "notes": "Slim horizontal pull matching the source image.",
-      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face.",
+      "idealRevitTool": "nestedFamily",
+      "approximationReason": "Current builder approximates pull hardware as rectangular extrusion geometry until nested sweep hardware is supported."
     },
     {
       "id": "drawer_handle_2",
@@ -462,7 +474,9 @@
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
       "notes": "Slim horizontal pull matching the source image.",
-      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face.",
+      "idealRevitTool": "nestedFamily",
+      "approximationReason": "Current builder approximates pull hardware as rectangular extrusion geometry until nested sweep hardware is supported."
     },
     {
       "id": "drawer_handle_3",
@@ -474,7 +488,9 @@
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
       "notes": "Slim horizontal pull matching the source image.",
-      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face.",
+      "idealRevitTool": "nestedFamily",
+      "approximationReason": "Current builder approximates pull hardware as rectangular extrusion geometry until nested sweep hardware is supported."
     },
     {
       "id": "drawer_handle_4",
@@ -486,7 +502,9 @@
       "dimensions": { "width": 151.1, "depth": 25, "height": 15 },
       "visible": true,
       "notes": "Slim horizontal pull matching the source image.",
-      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face."
+      "intent": "Pull should eventually be modeled as a sweep path with small end returns back to the drawer face.",
+      "idealRevitTool": "nestedFamily",
+      "approximationReason": "Current builder approximates pull hardware as rectangular extrusion geometry until nested sweep hardware is supported."
     },
     {
       "id": "front_left_leg",
@@ -498,7 +516,9 @@
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
       "notes": "Rectangular placeholder for tapered angled leg.",
-      "intent": "Leg should eventually be modeled as a tapered round blend."
+      "intent": "Leg should eventually be modeled as a tapered round blend.",
+      "idealRevitTool": "blend",
+      "approximationReason": "Current builder approximates tapered round legs as rectangular extrusions until blend support exists."
     },
     {
       "id": "front_right_leg",
@@ -510,7 +530,9 @@
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
       "notes": "Rectangular placeholder for tapered angled leg.",
-      "intent": "Leg should eventually be modeled as a tapered round blend."
+      "intent": "Leg should eventually be modeled as a tapered round blend.",
+      "idealRevitTool": "blend",
+      "approximationReason": "Current builder approximates tapered round legs as rectangular extrusions until blend support exists."
     },
     {
       "id": "back_left_leg",
@@ -522,7 +544,9 @@
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
       "notes": "Rectangular placeholder for rear leg.",
-      "intent": "Leg should eventually be modeled as a tapered round blend."
+      "intent": "Leg should eventually be modeled as a tapered round blend.",
+      "idealRevitTool": "blend",
+      "approximationReason": "Current builder approximates tapered round legs as rectangular extrusions until blend support exists."
     },
     {
       "id": "back_right_leg",
@@ -534,7 +558,9 @@
       "dimensions": { "width": 48.9, "depth": 48.9, "height": "Leg Height" },
       "visible": true,
       "notes": "Rectangular placeholder for rear leg.",
-      "intent": "Leg should eventually be modeled as a tapered round blend."
+      "intent": "Leg should eventually be modeled as a tapered round blend.",
+      "idealRevitTool": "blend",
+      "approximationReason": "Current builder approximates tapered round legs as rectangular extrusions until blend support exists."
     }
   ],
   "constraints": [

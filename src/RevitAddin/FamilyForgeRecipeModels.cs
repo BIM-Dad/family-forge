@@ -103,6 +103,8 @@ public sealed class GeometrySpec
     public string? Subcategory { get; set; }
     public string? Axis { get; set; }
     public string Material { get; set; } = string.Empty;
+    public string? IdealRevitTool { get; set; }
+    public string? ApproximationReason { get; set; }
     public PointSpec Origin { get; set; } = new();
     public DimensionsSpec Dimensions { get; set; } = new();
     public bool Visible { get; set; } = true;
