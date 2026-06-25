@@ -429,7 +429,6 @@ internal sealed class FamilyForgeNativeBuilder
     private readonly Dictionary<string, ElementId> _materials = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, FamilyParameter> _familyParameters = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Category> _subcategories = new(StringComparer.OrdinalIgnoreCase);
-    private readonly HashSet<string> _elementNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _referencePlaneNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> _warnings = new();
     private readonly double _familyWidth;
@@ -801,6 +800,8 @@ internal sealed class FamilyForgeNativeBuilder
 
         _warnings.Add(
             "Centered recipe X/Y coordinates on the Revit family origin so default Center Left/Right and Center Front/Back planes remain meaningful.");
+        _warnings.Add(
+            "Rectangular extrusions are oriented by thinnest dimension so panels use XY, XZ, or YZ sketch planes instead of always extruding from Ref. Level.");
     }
 
     private void CreateGeometry()
@@ -837,29 +838,26 @@ internal sealed class FamilyForgeNativeBuilder
             return;
         }
 
-        var profile = new CurveArray();
-        var p1 = origin;
-        var p2 = origin + new XYZ(width, 0, 0);
-        var p3 = origin + new XYZ(width, depth, 0);
-        var p4 = origin + new XYZ(0, depth, 0);
-
-        profile.Append(Line.CreateBound(p1, p2));
-        profile.Append(Line.CreateBound(p2, p3));
-        profile.Append(Line.CreateBound(p3, p4));
-        profile.Append(Line.CreateBound(p4, p1));
+        var extrusionLayout = GetRectangularExtrusionLayout(origin, width, depth, height);
+        var profile = CreateRectangularProfile(
+            extrusionLayout.Origin,
+            extrusionLayout.ProfileXAxis,
+            extrusionLayout.ProfileYAxis,
+            extrusionLayout.ProfileWidth,
+            extrusionLayout.ProfileHeight);
 
         var profileArray = new CurveArrArray();
         profileArray.Append(profile);
 
         var sketchPlane = SketchPlane.Create(
             _document,
-            Plane.CreateByNormalAndOrigin(XYZ.BasisZ, origin));
+            Plane.CreateByNormalAndOrigin(extrusionLayout.ExtrusionAxis, extrusionLayout.Origin));
 
         var extrusion = _document.FamilyCreate.NewExtrusion(
             true,
             profileArray,
             sketchPlane,
-            height);
+            extrusionLayout.ExtrusionDepth);
 
         FinishForm(extrusion, geometry);
     }
@@ -920,7 +918,6 @@ internal sealed class FamilyForgeNativeBuilder
 
     private void FinishForm(GenericForm form, GeometrySpec geometry)
     {
-        TrySetUniqueElementName(form, geometry);
         ApplyMaterial(form, geometry.Material);
         ApplySubcategory(form, geometry.Subcategory);
         BuiltGeometryCount++;
@@ -969,41 +966,93 @@ internal sealed class FamilyForgeNativeBuilder
         return existingMaterial?.Id ?? ElementId.InvalidElementId;
     }
 
-    private void TrySetUniqueElementName(Element element, GeometrySpec geometry)
+    private static RectangularExtrusionLayout GetRectangularExtrusionLayout(
+        XYZ origin,
+        double width,
+        double depth,
+        double height)
     {
-        var baseName = MakeRevitSafeName(
-            string.IsNullOrWhiteSpace(geometry.Name) ? geometry.Id : geometry.Name);
-
-        for (var index = 0; index < 25; index++)
+        if (width <= depth && width <= height)
         {
-            var candidate = index == 0
-                ? baseName
-                : $"{baseName}_{geometry.Id}_{index}";
-
-            if (!_elementNames.Add(candidate))
-            {
-                continue;
-            }
-
-            try
-            {
-                element.Name = candidate;
-                return;
-            }
-            catch (Autodesk.Revit.Exceptions.ArgumentException)
-            {
-                // Revit may know about names that are not obvious through this builder.
-            }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-            {
-                _warnings.Add(
-                    $"Revit did not allow a custom name for geometry '{geometry.Id}'. The default element name was kept.");
-                return;
-            }
+            return new RectangularExtrusionLayout(
+                origin,
+                XYZ.BasisX,
+                XYZ.BasisY,
+                XYZ.BasisZ,
+                depth,
+                height,
+                width);
         }
 
-        _warnings.Add(
-            $"Could not assign a unique custom name for geometry '{geometry.Id}'. The default element name was kept.");
+        if (depth <= width && depth <= height)
+        {
+            return new RectangularExtrusionLayout(
+                origin,
+                XYZ.BasisY,
+                XYZ.BasisX,
+                XYZ.BasisZ,
+                width,
+                height,
+                depth);
+        }
+
+        return new RectangularExtrusionLayout(
+            origin,
+            XYZ.BasisZ,
+            XYZ.BasisX,
+            XYZ.BasisY,
+            width,
+            depth,
+            height);
+    }
+
+    private static CurveArray CreateRectangularProfile(
+        XYZ origin,
+        XYZ xAxis,
+        XYZ yAxis,
+        double width,
+        double height)
+    {
+        var profile = new CurveArray();
+        var p1 = origin;
+        var p2 = origin + (xAxis * width);
+        var p3 = origin + (xAxis * width) + (yAxis * height);
+        var p4 = origin + (yAxis * height);
+
+        profile.Append(Line.CreateBound(p1, p2));
+        profile.Append(Line.CreateBound(p2, p3));
+        profile.Append(Line.CreateBound(p3, p4));
+        profile.Append(Line.CreateBound(p4, p1));
+        return profile;
+    }
+
+    private readonly struct RectangularExtrusionLayout
+    {
+        public RectangularExtrusionLayout(
+            XYZ origin,
+            XYZ extrusionAxis,
+            XYZ profileXAxis,
+            XYZ profileYAxis,
+            double profileWidth,
+            double profileHeight,
+            double extrusionDepth)
+        {
+            Origin = origin;
+            ExtrusionAxis = extrusionAxis;
+            ProfileXAxis = profileXAxis;
+            ProfileYAxis = profileYAxis;
+            ProfileWidth = profileWidth;
+            ProfileHeight = profileHeight;
+            ExtrusionDepth = extrusionDepth;
+        }
+
+        public XYZ Origin { get; }
+        public XYZ ExtrusionAxis { get; }
+        public XYZ ProfileXAxis { get; }
+        public XYZ ProfileYAxis { get; }
+        public double ProfileWidth { get; }
+        public double ProfileHeight { get; }
+        public double ExtrusionDepth { get; }
     }
 
     private static string MakeRevitSafeName(string value)
