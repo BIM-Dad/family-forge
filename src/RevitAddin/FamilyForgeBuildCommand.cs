@@ -147,7 +147,7 @@ public sealed class FamilyForgeBuildCommand
                     $"Recipe QA status is '{recipe.Qa.Status}'. Review before client delivery.");
             }
 
-            WriteQaReport(
+            var qaReportPath = WriteQaReport(
                 recipePath,
                 recipe,
                 result,
@@ -156,6 +156,8 @@ public sealed class FamilyForgeBuildCommand
                 builder.BuiltGeometryCount,
                 builder.CreatedParameterCount,
                 builder.CreatedReferencePlaneCount);
+            var feedbackReportPath = WriteFeedbackReport(recipePath, recipe, result);
+            result.SetArtifacts(outputPath, qaReportPath, feedbackReportPath);
 
             ActivateSavedFamily(uiApplication, familyDocument, outputPath, result);
 
@@ -227,7 +229,7 @@ public sealed class FamilyForgeBuildCommand
         return string.IsNullOrWhiteSpace(safe) ? "SymetriFamilyForgeFamily" : safe;
     }
 
-    private static void WriteQaReport(
+    private static string WriteQaReport(
         string recipePath,
         FamilyForgeRecipe recipe,
         FamilyForgeBuildResult preflight,
@@ -272,23 +274,14 @@ public sealed class FamilyForgeBuildCommand
         AddVisibilitySection(lines, recipe.VisibilityStrategy);
         AddStringListSection(lines, "Publishing QA", recipe.PublishingQa);
 
-        lines.Add("## Warnings");
-
         var warnings = preflight.Warnings
             .Concat(recipe.Qa.Warnings)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (warnings.Count == 0)
-        {
-            lines.Add("- None");
-        }
-        else
-        {
-            lines.AddRange(warnings.Select(warning => "- " + warning));
-        }
-
-        lines.Add(string.Empty);
+        AddWarningSection(lines, "Open Questions", warnings, IsOpenQuestion);
+        AddWarningSection(lines, "Builder Limitations", warnings, IsBuilderLimitation);
+        AddWarningSection(lines, "Recipe Review Items", warnings, warning => !IsOpenQuestion(warning) && !IsBuilderLimitation(warning));
         lines.Add("## Assumptions");
 
         if (recipe.Assumptions.Count == 0)
@@ -301,6 +294,141 @@ public sealed class FamilyForgeBuildCommand
         }
 
         File.WriteAllLines(reportPath, lines);
+        return reportPath;
+    }
+
+    private static string WriteFeedbackReport(
+        string recipePath,
+        FamilyForgeRecipe recipe,
+        FamilyForgeBuildResult result)
+    {
+        var reportPath = Path.ChangeExtension(recipePath, ".family-forge-feedback.md");
+        var openQuestions = result.Warnings
+            .Where(IsOpenQuestion)
+            .Select(RemoveWarningPrefix)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var builderLimitations = result.Warnings
+            .Where(IsBuilderLimitation)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var lines = new List<string>
+        {
+            "# Symetri Family Forge Recipe Feedback",
+            string.Empty,
+            $"Family: {recipe.Family.Name}",
+            $"Recipe QA Status: {recipe.Qa.Status}",
+            string.Empty,
+            "## Use This To Revise The AI Prompt Or JSON",
+            "Copy the relevant items below into the next AI connector prompt, then regenerate or edit the recipe before rebuilding.",
+            string.Empty,
+            "## Questions To Answer"
+        };
+
+        if (openQuestions.Count == 0)
+        {
+            lines.Add("- None");
+        }
+        else
+        {
+            lines.AddRange(openQuestions.Select(question => "- " + question));
+        }
+
+        lines.Add(string.Empty);
+        lines.Add("## Suggested Prompt Additions");
+        if (openQuestions.Count == 0)
+        {
+            lines.Add("- No clarifying questions were captured in this run.");
+        }
+        else
+        {
+            foreach (var question in openQuestions)
+            {
+                lines.Add($"- Resolve before JSON export: {question}");
+            }
+        }
+
+        if (recipe.NestedFamilies.Count > 0)
+        {
+            foreach (var nestedFamily in recipe.NestedFamilies.Where(item => item.Status is "recommended" or "required"))
+            {
+                lines.Add(
+                    $"- Decide whether `{nestedFamily.Name}` should remain simplified geometry or become a nested family. Purpose: {nestedFamily.Purpose}");
+            }
+        }
+
+        lines.Add(string.Empty);
+        lines.Add("## Builder Gaps To Track Separately");
+        if (builderLimitations.Count == 0)
+        {
+            lines.Add("- None");
+        }
+        else
+        {
+            lines.AddRange(builderLimitations.Select(warning => "- " + RemoveWarningPrefix(warning)));
+        }
+
+        lines.Add(string.Empty);
+        lines.Add("## Current Publishing QA");
+        lines.AddRange(recipe.PublishingQa.Count == 0
+            ? new[] { "- None" }
+            : recipe.PublishingQa.Select(item => "- " + item));
+
+        File.WriteAllLines(reportPath, lines);
+        return reportPath;
+    }
+
+    private static void AddWarningSection(
+        List<string> lines,
+        string title,
+        IReadOnlyList<string> warnings,
+        Func<string, bool> predicate)
+    {
+        lines.Add("## " + title);
+        var matchingWarnings = warnings
+            .Where(predicate)
+            .Select(RemoveWarningPrefix)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (matchingWarnings.Count == 0)
+        {
+            lines.Add("- None");
+        }
+        else
+        {
+            lines.AddRange(matchingWarnings.Select(warning => "- " + warning));
+        }
+
+        lines.Add(string.Empty);
+    }
+
+    private static bool IsOpenQuestion(string warning)
+    {
+        return warning.StartsWith("Open question:", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBuilderLimitation(string warning)
+    {
+        return ContainsIgnoreCase(warning, "not implemented")
+            || ContainsIgnoreCase(warning, "not yet")
+            || ContainsIgnoreCase(warning, "current builder")
+            || ContainsIgnoreCase(warning, "not associated")
+            || ContainsIgnoreCase(warning, "not locked");
+    }
+
+    private static bool ContainsIgnoreCase(string value, string searchText)
+    {
+        return value.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    private static string RemoveWarningPrefix(string warning)
+    {
+        const string openQuestionPrefix = "Open question:";
+        return warning.StartsWith(openQuestionPrefix, StringComparison.OrdinalIgnoreCase)
+            ? warning.Substring(openQuestionPrefix.Length).Trim()
+            : warning;
     }
 
     private static void AddStrategySection(List<string> lines, string title, IReadOnlyList<StrategyItemSpec> items)
@@ -725,12 +853,6 @@ internal sealed class FamilyForgeNativeBuilder
 
             referencePlane.Name = MakeRevitSafeName(referencePlaneSpec.Name);
             CreatedReferencePlaneCount++;
-
-            if (referencePlaneSpec.IsStrongReference)
-            {
-                _warnings.Add(
-                    $"Created reference plane '{referencePlaneSpec.Name}', but strong-reference assignment is not implemented for this Revit API target yet.");
-            }
         }
         catch (Exception ex)
         {
@@ -796,6 +918,12 @@ internal sealed class FamilyForgeNativeBuilder
         {
             _warnings.Add(
                 "Created family parameters from the recipe, but geometry dimensions are not yet associated to those parameters through Revit constraints.");
+        }
+
+        if (_recipe.ReferencePlanes.Any(referencePlane => referencePlane.IsStrongReference))
+        {
+            _warnings.Add(
+                "Reference planes were created and named, but strong-reference assignment is not implemented for this Revit API target yet.");
         }
 
         _warnings.Add(

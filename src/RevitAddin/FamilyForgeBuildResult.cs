@@ -9,6 +9,9 @@ public sealed class FamilyForgeBuildResult
     private readonly List<string> _warnings = new();
 
     public string Message { get; private set; }
+    public string? OutputPath { get; private set; }
+    public string? QaReportPath { get; private set; }
+    public string? FeedbackReportPath { get; private set; }
     public IReadOnlyList<string> Errors => _errors;
     public IReadOnlyList<string> Warnings => _warnings;
     public bool CanBuild => !_errors.Any();
@@ -39,5 +42,11 @@ public sealed class FamilyForgeBuildResult
     {
         _warnings.Add(message);
     }
-}
 
+    public void SetArtifacts(string outputPath, string qaReportPath, string feedbackReportPath)
+    {
+        OutputPath = outputPath;
+        QaReportPath = qaReportPath;
+        FeedbackReportPath = feedbackReportPath;
+    }
+}

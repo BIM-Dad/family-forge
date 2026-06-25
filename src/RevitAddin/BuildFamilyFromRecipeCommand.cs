@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -46,16 +47,53 @@ public sealed class BuildFamilyFromRecipeCommand : IExternalCommand
 
     private static string FormatResult(FamilyForgeBuildResult result)
     {
-        var lines = new[]
+        var lines = new List<string>
         {
             result.Message,
-            string.Empty,
-            result.Errors.Any() ? "Errors:" : string.Empty,
-            string.Join(Environment.NewLine, result.Errors.Select(item => "- " + item)),
-            string.Empty,
-            result.Warnings.Any() ? "Warnings:" : "No warnings.",
-            string.Join(Environment.NewLine, result.Warnings.Select(item => "- " + item))
+            string.Empty
         };
+
+        if (!string.IsNullOrWhiteSpace(result.OutputPath))
+        {
+            lines.Add("Output Family:");
+            lines.Add(result.OutputPath);
+            lines.Add(string.Empty);
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.QaReportPath))
+        {
+            lines.Add("QA Report:");
+            lines.Add(result.QaReportPath);
+            lines.Add(string.Empty);
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.FeedbackReportPath))
+        {
+            lines.Add("Recipe Feedback Report:");
+            lines.Add(result.FeedbackReportPath);
+            lines.Add(string.Empty);
+        }
+
+        if (result.Errors.Any())
+        {
+            lines.Add("Errors:");
+            lines.AddRange(result.Errors.Take(5).Select(item => "- " + item));
+            lines.Add(string.Empty);
+        }
+
+        if (result.Warnings.Any())
+        {
+            lines.Add($"Warnings: {result.Warnings.Count}");
+            lines.AddRange(result.Warnings.Take(5).Select(item => "- " + item));
+            if (result.Warnings.Count > 5)
+            {
+                lines.Add($"- See reports for {result.Warnings.Count - 5} more warning(s).");
+            }
+        }
+        else
+        {
+            lines.Add("No warnings.");
+        }
 
         return string.Join(
             Environment.NewLine,
