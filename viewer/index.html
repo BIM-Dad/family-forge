@@ -197,7 +197,6 @@
     <div class="actions">
       <label class="file-label" for="recipeFile">Open Recipe JSON</label>
       <input id="recipeFile" type="file" accept=".json,application/json">
-      <button id="loadSample" type="button">Load Cabinet Sample</button>
       <button id="copyFeedback" type="button">Copy Feedback</button>
     </div>
   </header>
@@ -239,7 +238,6 @@
 
     const els = {
       file: document.getElementById("recipeFile"),
-      loadSample: document.getElementById("loadSample"),
       copyFeedback: document.getElementById("copyFeedback"),
       canvas: document.getElementById("preview"),
       jsonBox: document.getElementById("jsonBox"),
@@ -258,14 +256,6 @@
       loadRecipe(JSON.parse(text));
     });
 
-    els.loadSample.addEventListener("click", async () => {
-      const response = await fetch("../examples/image-to-recipe-tests/001-wood-storage-cabinet/family_recipe.generated.json");
-      if (!response.ok) {
-        alert("Sample load needs a local web server. Use Open Recipe JSON instead, or run a simple static server from the repo.");
-        return;
-      }
-      loadRecipe(await response.json());
-    });
 
     els.copyFeedback.addEventListener("click", async () => {
       const text = buildFeedbackText(state.recipe);
