@@ -104,12 +104,15 @@ public sealed class FamilyForgeBuildCommand
         string recipePath,
         FamilyForgeBuildResult preflight)
     {
+        var tracePath = Path.ChangeExtension(recipePath, ".family-forge-build-trace.log");
+        Trace(tracePath, $"Build started for recipe '{recipePath}'.");
         var application = uiApplication.Application;
         var templatePath = FamilyForgeTemplateResolver.ResolveTemplatePath(
             recipe,
             application.VersionNumber);
         if (templatePath is null)
         {
+            Trace(tracePath, "Stopped: no supported family template was found.");
             preflight.AddError(
                 $"No supported family template was found for category '{recipe.Family.Category}' and Revit {application.VersionNumber}.");
             return preflight;
@@ -118,21 +121,30 @@ public sealed class FamilyForgeBuildCommand
         Document familyDocument;
         try
         {
+            Trace(tracePath, $"Creating family document from template '{templatePath}'.");
             familyDocument = application.NewFamilyDocument(templatePath);
         }
         catch (Exception ex)
         {
+            Trace(tracePath, $"Failed creating family document: {ex}");
             preflight.AddError($"Could not create family document: {ex.Message}");
             return preflight;
         }
 
         try
         {
-            var builder = new FamilyForgeNativeBuilder(familyDocument, recipe);
+            var builder = new FamilyForgeNativeBuilder(
+                familyDocument,
+                recipe,
+                message => Trace(tracePath, message));
+            Trace(tracePath, "Native builder started.");
             builder.Build();
+            Trace(tracePath, $"Native builder completed. Built geometry count: {builder.BuiltGeometryCount}.");
 
             var outputPath = ResolveOutputFamilyPath(recipePath, recipe.Family.Name);
+            Trace(tracePath, $"Saving family document to '{outputPath}'.");
             SaveFamilyDocument(familyDocument, outputPath);
+            Trace(tracePath, "Family document saved.");
 
             var result = FamilyForgeBuildResult.Success(
                 $"Created family '{recipe.Family.Name}' from recipe. Built {builder.BuiltGeometryCount} geometry item(s). Saved to: {outputPath}");
@@ -164,15 +176,34 @@ public sealed class FamilyForgeBuildCommand
                 builder.CreatedReferencePlaneCount);
             var feedbackReportPath = WriteFeedbackReport(recipePath, recipe, result);
             result.SetArtifacts(outputPath, qaReportPath, feedbackReportPath);
+            Trace(tracePath, $"Reports written. QA: '{qaReportPath}'. Feedback: '{feedbackReportPath}'.");
 
-            ActivateSavedFamily(uiApplication, familyDocument, outputPath, result);
+            result.AddWarning(
+                "Saved the generated family and left the build document open for review. The add-in no longer closes and reopens the file automatically, which avoids extra Revit document/view activation events from other add-ins.");
+            result.AddWarning($"Build trace: {tracePath}");
+            Trace(tracePath, "Build completed successfully.");
 
             return result;
         }
         catch (Exception ex)
         {
+            Trace(tracePath, $"Build failed: {ex}");
             preflight.AddError($"Family build failed: {ex.Message}");
             return preflight;
+        }
+    }
+
+    private static void Trace(string tracePath, string message)
+    {
+        try
+        {
+            File.AppendAllText(
+                tracePath,
+                $"[{DateTime.Now:O}] {message}{Environment.NewLine}");
+        }
+        catch
+        {
+            // Trace logging must never interfere with the Revit build.
         }
     }
 
@@ -194,34 +225,6 @@ public sealed class FamilyForgeBuildCommand
         };
 
         familyDocument.SaveAs(outputPath, saveOptions);
-    }
-
-    private static void ActivateSavedFamily(
-        UIApplication uiApplication,
-        Document familyDocument,
-        string outputPath,
-        FamilyForgeBuildResult result)
-    {
-        try
-        {
-            familyDocument.Close(false);
-        }
-        catch (Exception ex)
-        {
-            result.AddWarning(
-                $"Saved the family, but Revit did not close the temporary build document before activation: {ex.Message}");
-        }
-
-        try
-        {
-            uiApplication.OpenAndActivateDocument(outputPath);
-            result.AddWarning("Opened the saved family file in Revit for review.");
-        }
-        catch (Exception ex)
-        {
-            result.AddWarning(
-                $"Saved the family, but Revit could not activate it automatically: {ex.Message}");
-        }
     }
 
     private static string MakeSafeFileName(string value)
@@ -567,13 +570,18 @@ internal sealed class FamilyForgeNativeBuilder
     private readonly Dictionary<string, Category> _subcategories = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _referencePlaneNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<string> _warnings = new();
+    private readonly Action<string>? _trace;
     private readonly double _familyWidth;
     private readonly double _familyDepth;
 
-    public FamilyForgeNativeBuilder(Document document, FamilyForgeRecipe recipe)
+    public FamilyForgeNativeBuilder(
+        Document document,
+        FamilyForgeRecipe recipe,
+        Action<string>? trace = null)
     {
         _document = document;
         _recipe = recipe;
+        _trace = trace;
         _lengthParameters = recipe.Parameters
             .Where(parameter => string.Equals(parameter.DataType, "length", StringComparison.OrdinalIgnoreCase))
             .GroupBy(parameter => parameter.Name, StringComparer.OrdinalIgnoreCase)
@@ -949,6 +957,8 @@ internal sealed class FamilyForgeNativeBuilder
         {
             using var subTransaction = new SubTransaction(_document);
             var builtBefore = BuiltGeometryCount;
+            _trace?.Invoke(
+                $"Geometry start: {GeometryLabel(geometry)} type={geometry.Type} material={geometry.Material}.");
 
             try
             {
@@ -969,11 +979,16 @@ internal sealed class FamilyForgeNativeBuilder
                 }
 
                 subTransaction.Commit();
+                _trace?.Invoke(
+                    BuiltGeometryCount > builtBefore
+                        ? $"Geometry completed: {GeometryLabel(geometry)}."
+                        : $"Geometry skipped without exception: {GeometryLabel(geometry)}.");
             }
             catch (Exception ex)
             {
                 TryRollBack(subTransaction);
                 BuiltGeometryCount = builtBefore;
+                _trace?.Invoke($"Geometry failed: {GeometryLabel(geometry)}. {ex}");
                 _warnings.Add(
                     $"Skipped geometry '{GeometryLabel(geometry)}' because Revit could not create it safely: {ex.Message}");
             }
