@@ -245,9 +245,9 @@
 
     function loadRecipe(recipe) {
       state.recipe = recipe;
-      state.params = new Map((recipe.parameters || []).map(param => [param.name, coerceNumber(param.value, 0)]));
+      state.params = new Map(asArray(recipe.parameters).map(param => [param.name, coerceNumber(param.value, 0)]));
       state.baselineParams = new Map(state.params);
-      state.colors = new Map((recipe.materials || []).map(material => [material.name, material.color || "#888888"]));
+      state.colors = new Map(asArray(recipe.materials).map(material => [material.name, material.color || "#888888"]));
       els.jsonBox.textContent = JSON.stringify(recipe, null, 2);
       render();
     }
@@ -269,15 +269,15 @@
       addMetric(els.summary, "Family", recipe.family?.name || "Unnamed");
       addMetric(els.summary, "Category", recipe.family?.category || "Unknown");
       addMetric(els.summary, "Units", recipe.family?.units || "Unknown");
-      addMetric(els.summary, "Geometry", (recipe.geometry || []).length);
-      addMetric(els.summary, "Open Questions", (recipe.clarifyingQuestions || []).length);
+      addMetric(els.summary, "Geometry", asArray(recipe.geometry).length);
+      addMetric(els.summary, "Open Questions", asStringArray(recipe.clarifyingQuestions).length);
       addMetric(els.summary, "Builder Gaps", collectBuilderGaps(recipe).length);
     }
 
     function renderParameters() {
       const recipe = state.recipe;
       els.parameters.innerHTML = "";
-      const params = recipe.parameters || [];
+      const params = asArray(recipe.parameters);
       if (!params.length) return empty(els.parameters, "No parameters found.");
       for (const param of params) {
         const value = state.params.get(param.name) ?? 0;
@@ -304,7 +304,7 @@
 
     function renderElements() {
       els.elements.innerHTML = "";
-      const geometry = state.recipe.geometry || [];
+      const geometry = asArray(state.recipe.geometry);
       if (!geometry.length) return empty(els.elements, "No geometry found.");
       for (const item of geometry) {
         const ideal = item.idealRevitTool || inferIdealTool(item);
@@ -317,7 +317,7 @@
 
     function renderQuestions() {
       els.questions.innerHTML = "";
-      const questions = state.recipe.clarifyingQuestions || [];
+      const questions = asStringArray(state.recipe.clarifyingQuestions);
       if (!questions.length) return empty(els.questions, "No open questions.");
       questions.forEach(question => addItem(els.questions, "Question", question, "warn"));
     }
@@ -358,7 +358,7 @@
     function collectFaces(recipe, origin, scale) {
       const faces = [];
       const units = recipe.family?.units || "mm";
-      for (const item of recipe.geometry || []) {
+      for (const item of asArray(recipe.geometry)) {
         if (item.visible === false) continue;
         faces.push(...boxFaces(item, origin, scale, units));
       }
@@ -503,16 +503,64 @@
     function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
     function formatNumber(value) { return Math.round(value * 100) / 100; }
 
+    function asArray(value) {
+      if (Array.isArray(value)) return value;
+      if (value === undefined || value === null) return [];
+      return [value];
+    }
+
+    function asStringArray(value) {
+      return asArray(value).map(item => typeof item === "string" ? item : JSON.stringify(item));
+    }
+
+    function collectShapeWarnings(recipe) {
+      const expectedArrays = [
+        "parameters",
+        "referencePlaneStrategy",
+        "parameterStrategy",
+        "nestedFamilies",
+        "publishingQa",
+        "referencePlanes",
+        "materials",
+        "geometry",
+        "constraints",
+        "assumptions",
+        "clarifyingQuestions"
+      ];
+      const warnings = [];
+      expectedArrays.forEach(key => {
+        if (Object.prototype.hasOwnProperty.call(recipe, key) && !Array.isArray(recipe[key])) {
+          warnings.push({
+            title: `Fix JSON shape: ${key}`,
+            detail: `${key} must be a JSON array. If there is only one item, wrap it in square brackets.`
+          });
+        }
+      });
+      if (recipe.qa?.warnings !== undefined && !Array.isArray(recipe.qa.warnings)) {
+        warnings.push({
+          title: "Fix JSON shape: qa.warnings",
+          detail: "qa.warnings must be a JSON array. If there is only one warning, wrap it in square brackets."
+        });
+      }
+      if (!asArray(recipe.geometry).length) {
+        warnings.push({
+          title: "No visible geometry",
+          detail: "The recipe has no geometry array items for the viewer or Revit builder to draw."
+        });
+      }
+      return warnings;
+    }
+
     function collectBuilderGaps(recipe) {
       const gaps = [];
-      for (const item of recipe.geometry || []) {
+      for (const item of asArray(recipe.geometry)) {
         if (!supportedTypes.has(item.type)) gaps.push({ title: item.name || item.id, detail: `Unsupported buildable geometry type: ${item.type}` });
         const ideal = item.idealRevitTool || inferIdealTool(item);
         if (ideal && !supportedTools.has(ideal)) {
           gaps.push({ title: item.name || item.id, detail: `Ideal Revit tool is ${ideal}; current builder will use ${item.type}. ${item.approximationReason || ""}`.trim() });
         }
       }
-      for (const nested of recipe.nestedFamilies || []) {
+      for (const nested of asArray(recipe.nestedFamilies)) {
         if (nested.status === "recommended" || nested.status === "required") {
           gaps.push({ title: nested.name, detail: `Nested family ${nested.status}: ${nested.purpose}` });
         }
@@ -523,8 +571,9 @@
     function buildFeedbackItems(recipe) {
       if (!recipe) return [];
       const items = [];
-      (recipe.clarifyingQuestions || []).forEach(question => items.push({ kind: "warn", title: "Question to answer", detail: question }));
-      (recipe.parameters || []).forEach(param => {
+      collectShapeWarnings(recipe).forEach(warning => items.push({ kind: "bad", title: warning.title, detail: warning.detail }));
+      asStringArray(recipe.clarifyingQuestions).forEach(question => items.push({ kind: "warn", title: "Question to answer", detail: question }));
+      asArray(recipe.parameters).forEach(param => {
         if (param.source === "inferred" || param.source === "defaulted") items.push({ kind: "warn", title: `Review ${param.name}`, detail: `Value is ${param.source}: ${param.value}` });
       });
       collectBuilderGaps(recipe).forEach(gap => items.push({ kind: "warn", title: `Builder gap: ${gap.title}`, detail: gap.detail }));
@@ -534,7 +583,7 @@
     function buildFeedbackText(recipe) {
       if (!recipe) return "";
       const lines = [`Symetri Family Forge recipe feedback for ${recipe.family?.name || "unnamed family"}`, "", "Questions to answer:"];
-      const questions = recipe.clarifyingQuestions || [];
+      const questions = asStringArray(recipe.clarifyingQuestions);
       lines.push(...(questions.length ? questions.map(item => `- ${item}`) : ["- None"]));
       lines.push("", "Suggested JSON/prompt revisions:");
       const feedback = buildFeedbackItems(recipe);

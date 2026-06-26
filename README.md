@@ -52,6 +52,8 @@ Use a three-part pipeline:
 
 The AI output remains editable JSON. Every step is inspectable.
 
+For connector testing, start with [`prompts/ai-connector-handoff-prompt.md`](prompts/ai-connector-handoff-prompt.md). Upload the image/spec material plus the schema and best-practice docs, paste that handoff prompt, then validate the returned JSON in the viewer before running the Revit builder. Do not rely on file uploads alone to tell an AI connector what to produce.
+
 ```mermaid
 flowchart LR
     A["Image, PDF, sketch, or prompt"] --> B["Any AI connector"]

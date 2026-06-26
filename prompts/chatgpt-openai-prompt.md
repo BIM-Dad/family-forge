@@ -35,6 +35,11 @@ The recipe must follow schemaVersion 0.1 and include:
 - clarifyingQuestions
 - qa status and warnings
 
+Critical JSON shape rule:
+- Always return these top-level fields as JSON arrays, even when there is only one item: parameters, referencePlaneStrategy, parameterStrategy, nestedFamilies, publishingQa, referencePlanes, materials, geometry, constraints, assumptions, clarifyingQuestions.
+- Always return qa.warnings as a JSON array.
+- Do not return referencePlaneStrategy, parameterStrategy, geometry, or clarifyingQuestions as paragraphs or single objects.
+
 Use these category values only:
 Furniture, Generic Models, Casework, Specialty Equipment
 

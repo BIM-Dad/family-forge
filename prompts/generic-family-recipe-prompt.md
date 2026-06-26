@@ -14,6 +14,8 @@ Follow these rules:
 
 - Output only JSON.
 - Match schema version `0.1`.
+- Always return these top-level fields as JSON arrays, even when there is only one item: `parameters`, `referencePlaneStrategy`, `parameterStrategy`, `nestedFamilies`, `publishingQa`, `referencePlanes`, `materials`, `geometry`, `constraints`, `assumptions`, and `clarifyingQuestions`.
+- Always return `qa.warnings` as a JSON array.
 - Do not invent critical dimensions silently.
 - If a dimension is not visible or provided, either use a clearly marked default or add a clarifying question.
 - Prefer simple native Revit primitives: rectangular extrusions, void rectangular extrusions, and cylinders.
@@ -53,6 +55,7 @@ Required output:
 
 - Valid JSON only.
 - `schemaVersion` must be `0.1`.
+- Top-level collection fields must be arrays. Do not return `referencePlaneStrategy`, `parameterStrategy`, `nestedFamilies`, `referencePlanes`, `materials`, `geometry`, `constraints`, `assumptions`, or `clarifyingQuestions` as paragraphs or single objects.
 - Use family category from: `Furniture`, `Generic Models`, `Casework`, `Specialty Equipment`.
 - Use hosting from: `NonHosted`, `FaceBased`, `WallBased`, `CeilingBased`, `FloorBased`, `RoofBased`.
 - Include Width, Depth, and Height parameters when applicable.

@@ -9,6 +9,7 @@ using Autodesk.Revit.UI;
 using System.Web.Script.Serialization;
 #else
 using System.Text.Json;
+using System.Text.Json.Serialization;
 #endif
 
 namespace Symetri.FamilyForge.RevitAddin;
@@ -60,19 +61,24 @@ public sealed class FamilyForgeBuildCommand
 #if NET48
             recipe = new JavaScriptSerializer().Deserialize<FamilyForgeRecipe>(json);
 #else
+            var serializerOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            serializerOptions.Converters.Add(new SingleOrArrayJsonConverterFactory());
             recipe = JsonSerializer.Deserialize<FamilyForgeRecipe>(
                 json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                serializerOptions);
 #endif
         }
         catch (Exception ex)
         {
             return new RecipeLoadResult(
                 null,
-                FamilyForgeBuildResult.Fail($"Recipe could not be read: {ex.Message}"));
+                FamilyForgeBuildResult.Fail(
+                    "Recipe could not be read: "
+                    + ex.Message
+                    + " Check that top-level collections such as parameters, referencePlaneStrategy, parameterStrategy, nestedFamilies, publishingQa, referencePlanes, materials, geometry, constraints, assumptions, and clarifyingQuestions are JSON arrays."));
         }
 
         if (recipe is null)
@@ -1348,6 +1354,56 @@ internal sealed class FamilyForgeNativeBuilder
             byte.Parse(hex.Substring(5, 2), NumberStyles.HexNumber));
     }
 }
+
+#if !NET48
+internal sealed class SingleOrArrayJsonConverterFactory : JsonConverterFactory
+{
+    public override bool CanConvert(Type typeToConvert)
+    {
+        return typeToConvert.IsGenericType
+            && typeToConvert.GetGenericTypeDefinition() == typeof(List<>);
+    }
+
+    public override JsonConverter CreateConverter(
+        Type typeToConvert,
+        JsonSerializerOptions options)
+    {
+        var itemType = typeToConvert.GetGenericArguments()[0];
+        var converterType = typeof(SingleOrArrayJsonConverter<>).MakeGenericType(itemType);
+        return (JsonConverter)Activator.CreateInstance(converterType)!;
+    }
+}
+
+internal sealed class SingleOrArrayJsonConverter<T> : JsonConverter<List<T>>
+{
+    public override List<T> Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Null)
+        {
+            return new List<T>();
+        }
+
+        if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            return JsonSerializer.Deserialize<List<T>>(ref reader, options) ?? new List<T>();
+        }
+
+        var item = JsonSerializer.Deserialize<T>(ref reader, options);
+        return item is null ? new List<T>() : new List<T> { item };
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        List<T> value,
+        JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(writer, (IEnumerable<T>)value, options);
+    }
+}
+#endif
 
 public sealed class FamilyForgeRecipePreflight
 {

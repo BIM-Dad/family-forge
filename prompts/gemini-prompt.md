@@ -11,6 +11,8 @@ Follow the Symetri Family Forge Revit family best-practices standard and trainin
 
 Use schemaVersion "0.1".
 
+Always return these top-level fields as JSON arrays, even when there is only one item: parameters, referencePlaneStrategy, parameterStrategy, nestedFamilies, publishingQa, referencePlanes, materials, geometry, constraints, assumptions, clarifyingQuestions. Always return qa.warnings as a JSON array. Do not return referencePlaneStrategy, parameterStrategy, geometry, or clarifyingQuestions as paragraphs or single objects.
+
 Allowed family categories:
 - Furniture
 - Generic Models

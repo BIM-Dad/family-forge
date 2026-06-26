@@ -18,6 +18,19 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SCHEMA = ROOT / "schema" / "family-recipe.schema.json"
+ARRAY_FIELDS = {
+    "parameters",
+    "referencePlaneStrategy",
+    "parameterStrategy",
+    "nestedFamilies",
+    "publishingQa",
+    "referencePlanes",
+    "materials",
+    "geometry",
+    "constraints",
+    "assumptions",
+    "clarifyingQuestions",
+}
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -50,7 +63,9 @@ def validate_json_schema(recipe: dict[str, Any], schema_path: Path) -> list[str]
 def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
     warnings: list[str] = []
 
-    parameters = recipe.get("parameters", [])
+    warnings.extend(collect_shape_warnings(recipe))
+
+    parameters = get_array(recipe, "parameters")
     parameter_names = [item.get("name") for item in parameters if isinstance(item, dict)]
     parameter_name_set = {name for name in parameter_names if isinstance(name, str)}
 
@@ -79,26 +94,29 @@ def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
 
     if not recipe.get("familyStrategy"):
         warnings.append("Missing recommended familyStrategy section.")
-    if not recipe.get("referencePlaneStrategy"):
+    if not get_array(recipe, "referencePlaneStrategy"):
         warnings.append("Missing recommended referencePlaneStrategy section.")
-    if not recipe.get("parameterStrategy"):
+    if not get_array(recipe, "parameterStrategy"):
         warnings.append("Missing recommended parameterStrategy section.")
 
-    nested_families = recipe.get("nestedFamilies", [])
-    if isinstance(nested_families, list):
-        for nested in nested_families:
-            if not isinstance(nested, dict):
-                continue
-            if nested.get("status") in {"recommended", "required"}:
-                warnings.append(
-                    f"Nested family candidate '{nested.get('name', '<unnamed>')}' is {nested.get('status')}: {nested.get('purpose', '')}"
-                )
+    nested_families = get_array(recipe, "nestedFamilies")
+    for nested in nested_families:
+        if not isinstance(nested, dict):
+            continue
+        if nested.get("status") in {"recommended", "required"}:
+            warnings.append(
+                f"Nested family candidate '{nested.get('name', '<unnamed>')}' is {nested.get('status')}: {nested.get('purpose', '')}"
+            )
 
-    materials = recipe.get("materials", [])
+    materials = get_array(recipe, "materials")
     material_names = {item.get("name") for item in materials if isinstance(item, dict)}
     builder_supported_tools = {"extrusion", "voidExtrusion", "cylinder"}
 
-    for geometry in recipe.get("geometry", []):
+    geometry_items = get_array(recipe, "geometry")
+    if not geometry_items:
+        warnings.append("No geometry array items found; the viewer and Revit builder will not create visible geometry.")
+
+    for geometry in geometry_items:
         if not isinstance(geometry, dict):
             continue
         geometry_id = geometry.get("id", "<unknown>")
@@ -159,6 +177,30 @@ def collect_cross_field_warnings(recipe: dict[str, Any]) -> list[str]:
             )
 
     return warnings
+
+
+def collect_shape_warnings(recipe: dict[str, Any]) -> list[str]:
+    warnings: list[str] = []
+    for field in sorted(ARRAY_FIELDS):
+        if field in recipe and not isinstance(recipe[field], list):
+            warnings.append(
+                f"Top-level '{field}' must be a JSON array; got {type(recipe[field]).__name__}. "
+                "Wrap a single item in square brackets."
+            )
+
+    qa = recipe.get("qa")
+    if isinstance(qa, dict) and "warnings" in qa and not isinstance(qa["warnings"], list):
+        warnings.append(
+            f"'qa.warnings' must be a JSON array; got {type(qa['warnings']).__name__}. "
+            "Wrap a single warning in square brackets."
+        )
+
+    return warnings
+
+
+def get_array(recipe: dict[str, Any], field: str) -> list[Any]:
+    value = recipe.get(field, [])
+    return value if isinstance(value, list) else []
 
 
 def _is_expression_reference(value: str, parameter_names: set[str]) -> bool:
