@@ -18,3 +18,5 @@ Start with `wardrobe_3bay.recipe.json` or `image-to-recipe-tests\001-wood-storag
 - Reset View: restore the default camera.
 
 Parameter sliders are preview-only. They update geometry in the browser so the recipe can be reviewed before Revit build, but they do not write JSON yet.
+
+The viewer applies proportional scaling from the original recipe baseline for numeric X/Y/Z origins and dimensions. Expression-driven values still resolve directly from the active parameter values. This keeps the preview coherent when overall width, depth, height, or body-height sliders are adjusted, but it is not a substitute for true Revit constraints.

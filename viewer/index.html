@@ -181,6 +181,7 @@
     const state = {
       recipe: null,
       params: new Map(),
+      baselineParams: new Map(),
       colors: new Map(),
       camera: { yaw: -35, pitch: 24, zoom: 1, panX: 0, panY: 0 },
       pointer: null
@@ -245,6 +246,7 @@
     function loadRecipe(recipe) {
       state.recipe = recipe;
       state.params = new Map((recipe.parameters || []).map(param => [param.name, coerceNumber(param.value, 0)]));
+      state.baselineParams = new Map(state.params);
       state.colors = new Map((recipe.materials || []).map(material => [material.name, material.color || "#888888"]));
       els.jsonBox.textContent = JSON.stringify(recipe, null, 2);
       render();
@@ -366,9 +368,9 @@
     function boxFaces(item, origin, scale, units) {
       const p = resolvePoint(item.origin || {}, units);
       const d = item.dimensions || {};
-      const width = resolveValue(d.width, units);
-      const depth = resolveValue(d.depth, units);
-      const height = resolveValue(d.height, units);
+      const width = resolveValue(d.width, units, "x");
+      const depth = resolveValue(d.depth, units, "y");
+      const height = resolveValue(d.height, units, "z");
       if (width <= 0 || depth <= 0 || height <= 0) return [];
       const world = [
         [p.x, p.y, p.z], [p.x + width, p.y, p.z], [p.x + width, p.y + depth, p.z], [p.x, p.y + depth, p.z],
@@ -437,19 +439,25 @@
 
     function getBounds(recipe) {
       const units = recipe.family?.units || "mm";
+      const height = resolveParam("Height", 1000, units);
+      const bodyStackHeight = resolveParam("Leg Height", 0, units) + resolveParam("Body Height", 0, units);
       return {
         width: resolveParam("Width", 1000, units),
         depth: resolveParam("Depth", 500, units),
-        height: resolveParam("Height", 1000, units)
+        height: Math.max(height, bodyStackHeight)
       };
     }
 
     function resolvePoint(point, units) {
-      return { x: resolveValue(point.x, units), y: resolveValue(point.y, units), z: resolveValue(point.z, units) };
+      return {
+        x: resolveValue(point.x, units, "x"),
+        y: resolveValue(point.y, units, "y"),
+        z: resolveValue(point.z, units, "z")
+      };
     }
 
-    function resolveValue(value, units) {
-      if (typeof value === "number") return convertUnits(value, units);
+    function resolveValue(value, units, axis) {
+      if (typeof value === "number") return convertUnits(value * getAxisScale(axis), units);
       if (typeof value === "string") return resolveExpression(value, units);
       return 0;
     }
@@ -474,6 +482,22 @@
 
     function centerX(value) { return value - getBounds(state.recipe).width / 2; }
     function centerY(value) { return value - getBounds(state.recipe).depth / 2; }
+    function getAxisScale(axis) {
+      if (axis === "x") return getParamRatio("Width");
+      if (axis === "y") return getParamRatio("Depth");
+      if (axis === "z") {
+        const heightRatio = getParamRatio("Height");
+        const bodyRatio = getParamRatio("Body Height");
+        return Math.abs(heightRatio - 1) > 0.001 ? heightRatio : bodyRatio;
+      }
+      return 1;
+    }
+    function getParamRatio(name) {
+      const baseline = state.baselineParams.get(name);
+      const current = state.params.get(name);
+      if (!Number.isFinite(baseline) || baseline === 0 || !Number.isFinite(current)) return 1;
+      return current / baseline;
+    }
     function convertUnits(value, units) { return units === "in" ? value * 25.4 : value; }
     function coerceNumber(value, fallback) { const next = Number(value); return Number.isFinite(next) ? next : fallback; }
     function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
