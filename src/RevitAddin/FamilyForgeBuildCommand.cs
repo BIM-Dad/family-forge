@@ -556,6 +556,8 @@ internal sealed class FamilyForgeNativeBuilder
 {
     private const double FeetPerMillimeter = 1.0 / 304.8;
     private const double FeetPerInch = 1.0 / 12.0;
+    private const double MinimumGeometryLengthFeet = 1.0 / 1024.0;
+    private const double MaximumGeometryLengthFeet = 10000.0;
 
     private readonly Document _document;
     private readonly FamilyForgeRecipe _recipe;
@@ -592,6 +594,9 @@ internal sealed class FamilyForgeNativeBuilder
     {
         using var transaction = new Transaction(_document, "Build Symetri Family Forge Recipe");
         transaction.Start();
+        var failureOptions = transaction.GetFailureHandlingOptions();
+        failureOptions.SetFailuresPreprocessor(new FamilyForgeFailuresPreprocessor(_warnings));
+        transaction.SetFailureHandlingOptions(failureOptions);
 
         CreateMaterials();
         CreateFamilyParameters();
@@ -942,20 +947,61 @@ internal sealed class FamilyForgeNativeBuilder
     {
         foreach (var geometry in _recipe.Geometry)
         {
-            switch (geometry.Type)
+            using var subTransaction = new SubTransaction(_document);
+            var builtBefore = BuiltGeometryCount;
+
+            try
             {
-                case "rectangularExtrusion":
-                    CreateRectangularExtrusion(geometry);
-                    break;
-                case "cylinder":
-                    CreateCylinder(geometry);
-                    break;
-                default:
-                    _warnings.Add(
-                        $"Skipped geometry '{geometry.Id}' because type '{geometry.Type}' is not implemented in the current builder.");
-                    break;
+                subTransaction.Start();
+
+                switch (geometry.Type)
+                {
+                    case "rectangularExtrusion":
+                        CreateRectangularExtrusion(geometry);
+                        break;
+                    case "cylinder":
+                        CreateCylinder(geometry);
+                        break;
+                    default:
+                        _warnings.Add(
+                            $"Skipped geometry '{geometry.Id}' because type '{geometry.Type}' is not implemented in the current builder.");
+                        break;
+                }
+
+                subTransaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                TryRollBack(subTransaction);
+                BuiltGeometryCount = builtBefore;
+                _warnings.Add(
+                    $"Skipped geometry '{GeometryLabel(geometry)}' because Revit could not create it safely: {ex.Message}");
             }
         }
+    }
+
+    private static void TryRollBack(SubTransaction subTransaction)
+    {
+        try
+        {
+            subTransaction.RollBack();
+        }
+        catch
+        {
+            // Revit may have already ended the subtransaction after a severe creation failure.
+        }
+    }
+
+    private static string GeometryLabel(GeometrySpec geometry)
+    {
+        if (!string.IsNullOrWhiteSpace(geometry.Id))
+        {
+            return geometry.Id;
+        }
+
+        return string.IsNullOrWhiteSpace(geometry.Name)
+            ? "<unnamed>"
+            : geometry.Name;
     }
 
     private void CreateRectangularExtrusion(GeometrySpec geometry)
@@ -969,6 +1015,16 @@ internal sealed class FamilyForgeNativeBuilder
         {
             _warnings.Add(
                 $"Skipped geometry '{geometry.Id}' because one or more dimensions were not greater than zero.");
+            return;
+        }
+
+        if (!IsSafeGeometryLength(width)
+            || !IsSafeGeometryLength(depth)
+            || !IsSafeGeometryLength(height)
+            || !IsSafePoint(origin))
+        {
+            _warnings.Add(
+                $"Skipped geometry '{geometry.Id}' because its origin or dimensions are outside the safe Revit build range.");
             return;
         }
 
@@ -1023,6 +1079,15 @@ internal sealed class FamilyForgeNativeBuilder
         {
             _warnings.Add(
                 $"Skipped cylinder '{geometry.Id}' because length or diameter was not greater than zero.");
+            return;
+        }
+
+        if (!IsSafeGeometryLength(length)
+            || !IsSafeGeometryLength(diameter)
+            || !IsSafePoint(origin))
+        {
+            _warnings.Add(
+                $"Skipped cylinder '{geometry.Id}' because its origin or dimensions are outside the safe Revit build range.");
             return;
         }
 
@@ -1158,6 +1223,28 @@ internal sealed class FamilyForgeNativeBuilder
         profile.Append(Line.CreateBound(p3, p4));
         profile.Append(Line.CreateBound(p4, p1));
         return profile;
+    }
+
+    private static bool IsSafePoint(XYZ point)
+    {
+        return IsFinite(point.X)
+            && IsFinite(point.Y)
+            && IsFinite(point.Z)
+            && Math.Abs(point.X) < MaximumGeometryLengthFeet
+            && Math.Abs(point.Y) < MaximumGeometryLengthFeet
+            && Math.Abs(point.Z) < MaximumGeometryLengthFeet;
+    }
+
+    private static bool IsSafeGeometryLength(double value)
+    {
+        return IsFinite(value)
+            && value >= MinimumGeometryLengthFeet
+            && value <= MaximumGeometryLengthFeet;
+    }
+
+    private static bool IsFinite(double value)
+    {
+        return !double.IsNaN(value) && !double.IsInfinity(value);
     }
 
     private readonly struct RectangularExtrusionLayout
@@ -1299,13 +1386,13 @@ internal sealed class FamilyForgeNativeBuilder
         {
             case double doubleValue:
                 result = doubleValue;
-                return true;
+                return IsFinite(result);
             case float floatValue:
                 result = floatValue;
-                return true;
+                return IsFinite(result);
             case decimal decimalValue:
                 result = (double)decimalValue;
-                return true;
+                return IsFinite(result);
             case int intValue:
                 result = intValue;
                 return true;
@@ -1319,7 +1406,7 @@ internal sealed class FamilyForgeNativeBuilder
         {
             if (jsonElement.ValueKind == JsonValueKind.Number)
             {
-                return jsonElement.TryGetDouble(out result);
+                return jsonElement.TryGetDouble(out result) && IsFinite(result);
             }
 
             if (jsonElement.ValueKind == JsonValueKind.String
@@ -1329,7 +1416,7 @@ internal sealed class FamilyForgeNativeBuilder
                     CultureInfo.InvariantCulture,
                     out result))
             {
-                return true;
+                return IsFinite(result);
             }
         }
 #endif
@@ -1338,7 +1425,8 @@ internal sealed class FamilyForgeNativeBuilder
             Convert.ToString(value, CultureInfo.InvariantCulture),
             NumberStyles.Float,
             CultureInfo.InvariantCulture,
-            out result);
+            out result)
+            && IsFinite(result);
     }
 
     private static Autodesk.Revit.DB.Color ParseColor(string hex)
@@ -1352,6 +1440,36 @@ internal sealed class FamilyForgeNativeBuilder
             byte.Parse(hex.Substring(1, 2), NumberStyles.HexNumber),
             byte.Parse(hex.Substring(3, 2), NumberStyles.HexNumber),
             byte.Parse(hex.Substring(5, 2), NumberStyles.HexNumber));
+    }
+}
+
+internal sealed class FamilyForgeFailuresPreprocessor : IFailuresPreprocessor
+{
+    private readonly IList<string> _warnings;
+
+    public FamilyForgeFailuresPreprocessor(IList<string> warnings)
+    {
+        _warnings = warnings;
+    }
+
+    public FailureProcessingResult PreprocessFailures(FailuresAccessor failuresAccessor)
+    {
+        var failureMessages = failuresAccessor.GetFailureMessages();
+        foreach (var failure in failureMessages)
+        {
+            var description = failure.GetDescriptionText();
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                _warnings.Add($"Revit build warning: {description}");
+            }
+
+            if (failure.GetSeverity() == FailureSeverity.Warning)
+            {
+                failuresAccessor.DeleteWarning(failure);
+            }
+        }
+
+        return FailureProcessingResult.Continue;
     }
 }
 

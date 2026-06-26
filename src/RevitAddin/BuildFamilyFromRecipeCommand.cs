@@ -28,10 +28,20 @@ public sealed class BuildFamilyFromRecipeCommand : IExternalCommand
             return Result.Cancelled;
         }
 
-        var buildCommand = new FamilyForgeBuildCommand();
-        var result = buildCommand.BuildFromRecipeFile(
-            dialog.FileName,
-            commandData.Application);
+        FamilyForgeBuildResult result;
+        try
+        {
+            var buildCommand = new FamilyForgeBuildCommand();
+            result = buildCommand.BuildFromRecipeFile(
+                dialog.FileName,
+                commandData.Application);
+        }
+        catch (Exception ex)
+        {
+            result = FamilyForgeBuildResult.Fail(
+                "Family build stopped before completion. The add-in caught an unexpected Revit/API error: "
+                + ex.Message);
+        }
 
         var summary = FormatResult(result);
         Autodesk.Revit.UI.TaskDialog.Show("Symetri Family Forge", summary);
